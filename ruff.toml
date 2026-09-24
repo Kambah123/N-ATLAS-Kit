@@ -4,7 +4,7 @@
 # uses the nearest config file.
 
 line-length = 100
-target-version = "py311"
+target-version = "py310"   # serve/ supports Python 3.10+, same as the SDK
 
 exclude = [
     ".venv",
@@ -40,3 +40,6 @@ ignore = [
 [format]
 quote-style = "double"
 indent-style = "space"
+
+[lint.isort]
+known-first-party = ["natlas_serve"]

@@ -1,0 +1,124 @@
+# Self-host N-ATLaS on your own GPU box.
+#
+#   cp .env.example .env     # set HF_TOKEN and NATLAS_API_KEYS
+#   docker compose up --build
+#   curl localhost:8080/health
+#
+# Three containers from one image:
+#
+#   vllm     NCAIR1/N-ATLaS on the GPU, OpenAI API on :8000   (internal only)
+#   asr      the four NCAIR1 Whisper models on CPU  :8001     (internal only)
+#   gateway  auth + CORS + logging, the only published port   :8080
+#
+# Only the gateway is exposed. vllm and asr have no authentication of their
+# own, so they must never be reachable from outside the compose network - that
+# is why neither declares a `ports:` mapping.
+
+name: natlas
+
+x-image: &image
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: natlas-serve:local
+
+services:
+  vllm:
+    <<: *image
+    # Replaces itself with the vLLM server, using the flags from
+    # natlas_serve/vllm_launcher.py - the same ones the Modal deployment uses.
+    command: ["python", "-m", "natlas_serve.vllm_launcher"]
+    environment:
+      # Gated repo: without a token that has accepted the N-ATLaS terms, the
+      # download fails with a 401 and the container will not become healthy.
+      HF_TOKEN: "${HF_TOKEN:?set HF_TOKEN in .env - every NCAIR1 repo is gated}"
+      NATLAS_ALLOW_ANONYMOUS: "true" # not an HTTP entry point; the gateway guards it
+      NATLAS_VLLM_HOST: "0.0.0.0"
+      NATLAS_VLLM_PORT: "8000"
+      NATLAS_LLM_MODEL: "${NATLAS_LLM_MODEL:-NCAIR1/N-ATLaS}"
+      NATLAS_VLLM_MAX_MODEL_LEN: "${NATLAS_VLLM_MAX_MODEL_LEN:-8192}"
+      NATLAS_VLLM_GPU_MEMORY_UTILIZATION: "${NATLAS_VLLM_GPU_MEMORY_UTILIZATION:-0.90}"
+      NATLAS_VLLM_EXTRA_ARGS: "${NATLAS_VLLM_EXTRA_ARGS:-}"
+      HF_HOME: /root/.cache/huggingface
+    volumes:
+      # ~15 GB of BF16 weights. Cache them outside the container or every
+      # restart re-downloads them.
+      - hf-cache:/root/.cache/huggingface
+    # vLLM uses shared memory for tensor parallelism and NCCL; Docker's 64 MB
+    # default causes obscure hangs.
+    shm_size: "8gb"
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 60
+      # Cold start downloads and loads ~15 GB. Give it 20 minutes before any
+      # failure counts against the retry budget.
+      start_period: 20m
+    restart: unless-stopped
+
+  asr:
+    <<: *image
+    command:
+      ["uvicorn", "natlas_serve.asr_app:app", "--host", "0.0.0.0", "--port", "8001"]
+    environment:
+      HF_TOKEN: "${HF_TOKEN:?set HF_TOKEN in .env - every NCAIR1 repo is gated}"
+      NATLAS_ALLOW_ANONYMOUS: "true" # internal only, same reasoning as vllm
+      # CPU on purpose. vLLM pre-allocates its KV cache from whatever the GPU
+      # has free, so a second CUDA process on the same card is a coin-flip OOM.
+      # Whisper Small is 244M params: a 30 s clip takes a few seconds on 4 cores.
+      # Set to "cuda" only if vllm runs on a different card.
+      NATLAS_ASR_DEVICE: "${NATLAS_ASR_DEVICE:-cpu}"
+      NATLAS_ASR_CHUNK_SECONDS: "${NATLAS_ASR_CHUNK_SECONDS:-25}"
+      NATLAS_MAX_UPLOAD_BYTES: "${NATLAS_MAX_UPLOAD_BYTES:-67108864}"
+      HF_HOME: /root/.cache/huggingface
+    volumes:
+      - hf-cache:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 40
+      start_period: 5m
+    restart: unless-stopped
+
+  gateway:
+    <<: *image
+    command:
+      ["uvicorn", "natlas_serve.gateway:app", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      # The gateway is the authenticated edge. No default, no fallback: if this
+      # is unset the process refuses to start rather than listen wide open.
+      NATLAS_API_KEYS: "${NATLAS_API_KEYS:?generate one with - openssl rand -hex 32}"
+      NATLAS_CORS_ORIGINS: "${NATLAS_CORS_ORIGINS:-}"
+      NATLAS_VLLM_URL: http://vllm:8000
+      NATLAS_ASR_MODE: proxy
+      NATLAS_ASR_URL: http://asr:8001
+      NATLAS_LLM_MODEL: "${NATLAS_LLM_MODEL:-NCAIR1/N-ATLaS}"
+      NATLAS_REQUEST_TIMEOUT: "${NATLAS_REQUEST_TIMEOUT:-120}"
+      NATLAS_MAX_UPLOAD_BYTES: "${NATLAS_MAX_UPLOAD_BYTES:-67108864}"
+    ports:
+      - "${NATLAS_PORT:-8080}:8080"
+    depends_on:
+      vllm:
+        condition: service_healthy
+      asr:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  hf-cache:

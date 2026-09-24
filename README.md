@@ -92,10 +92,16 @@ Same API in Python. Same API in the browser. Same API on the edge.
 
 ## Status
 
-**Day 1 of 18 — the repo is scaffolded. Features land next.**
+**The backend is built. The SDKs are next.**
 
-This commit is tooling only: workspaces, strict TypeScript, linting, CI,
-licensing. Nothing below is implemented yet unless it is ticked.
+[`serve/`](./serve/) is complete and tested: N-ATLaS and all four ASR models
+behind one OpenAI-compatible base URL, deployable with `docker compose up` or
+`modal deploy`. Everything else below is tooling-only until it is ticked.
+
+> No GPU was available while `serve/` was written. Its 149 tests all run on
+> CPU against real ffmpeg and a mocked vLLM; what that leaves unverified is
+> listed openly in
+> [`serve/README.md`](./serve/README.md#️-what-is-tested-and-what-is-not).
 
 ### Planned features
 
@@ -121,16 +127,20 @@ licensing. Nothing below is implemented yet unless it is ticked.
 - [ ] Pydantic response models
 - [ ] CLI: `natlas chat --lang ha`, `natlas transcribe voice.ogg --lang ha`, `natlas translate "..." --to yo`
 
-#### `serve/` — the real backend
+#### `serve/` — the real backend ✅ **built** — see [`serve/README.md`](./serve/README.md)
 
-- [ ] vLLM serving `NCAIR1/N-ATLaS` as an OpenAI-compatible API with streaming, using the model's own chat template
-- [ ] FastAPI ASR server: `POST /v1/audio/transcriptions`, multipart + `language`
-- [ ] Routes `ha`/`ig`/`yo`/`en` to the matching `NCAIR1` ASR model
-- [ ] ffmpeg conversion of ogg/opus (WhatsApp voice notes), mp3, m4a, wav → 16 kHz mono
-- [ ] Chunking for audio longer than Whisper's 30-second window
-- [ ] Gateway: one base URL, Bearer auth, CORS, `GET /health`
-- [ ] Request logging — latency, language, token counts, **never user content**
-- [ ] `docker-compose.yml` for a GPU box + `modal deploy serve/modal_app.py` for one A10G/L4
+- [x] vLLM serving `NCAIR1/N-ATLaS` as an OpenAI-compatible API with streaming, using the model's own chat template
+- [x] FastAPI ASR server: `POST /v1/audio/transcriptions`, multipart + `language`
+- [x] Routes `ha`/`ig`/`yo`/`en` to the matching `NCAIR1` ASR model
+- [x] ffmpeg conversion of ogg/opus (WhatsApp voice notes), mp3, m4a, wav → 16 kHz mono
+- [x] Silence-aware chunking for audio longer than Whisper's 30-second window
+- [x] Gateway: one base URL, Bearer auth, CORS, `GET /health`
+- [x] Request logging — latency, language, token counts, **never user content**
+- [x] `docker-compose.yml` for a GPU box + `modal deploy serve/modal_app.py` for one A10/L4
+
+> 149 tests run on CPU with no gated weights. Everything that requires a real
+> GPU is still unverified and is listed explicitly under
+> [“What is tested, and what is not”](./serve/README.md#️-what-is-tested-and-what-is-not).
 
 #### `apps/playground` — Next.js on Vercel
 
@@ -268,6 +278,10 @@ pnpm py:install
 pnpm py:lint
 pnpm py:typecheck
 pnpm py:test
+
+# The self-hosting kit (no GPU needed to run its tests)
+pip install -e "serve[dev]"
+cd serve && pytest && mypy natlas_serve
 ```
 
 `pnpm check` runs format, lint, typecheck and test for the JS side in one go —

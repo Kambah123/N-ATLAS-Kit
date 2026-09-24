@@ -134,21 +134,40 @@ jobs:
           "
 
   # ---------------------------------------------------------------------------
-  # /serve - deployment scripts. Linted here; the SDK config does not reach it.
+  # /serve - the self-hosting kit. Everything here runs without a GPU and
+  # without downloading any gated weights; see serve/README.md for the list of
+  # things that consequently are NOT covered.
   # ---------------------------------------------------------------------------
   serve:
-    name: Serve scripts
+    name: Serve (Python ${{ matrix.python }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.10 is the floor declared in serve/pyproject.toml. Testing it
+        # catches 3.11+-only APIs (datetime.UTC, tomllib, ...) that would
+        # otherwise only fail for users.
+        python: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: serve/pyproject.toml
 
-      - name: Install tooling
-        run: python -m pip install "ruff>=0.6" "modal>=1.0"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          # [dev] only - [asr] would pull ~2.5 GB of torch for no benefit here.
+          python -m pip install -e "serve[dev]" "modal>=1.0"
+
+      - name: ffmpeg is available
+        # The runner image ships one; conftest.py falls back to the static
+        # imageio-ffmpeg build if it ever stops doing so.
+        run: ffmpeg -version | head -1
 
       - name: Lint (ruff)
         run: ruff check --output-format=github serve/
@@ -156,18 +175,51 @@ jobs:
       - name: Check formatting (ruff format)
         run: ruff format --check serve/
 
-      - name: Modal apps are importable and their CLI args parse
+      - name: Type-check (mypy, strict)
+        working-directory: serve
+        run: mypy natlas_serve
+
+      - name: Test
+        working-directory: serve
+        run: pytest --cov --cov-report=term-missing
+
+      - name: Modal apps are importable
         run: |
           for f in serve/modal_*.py; do
             echo "--- $f"
             python -c "
-          import importlib.util, sys
+          import importlib.util
           spec = importlib.util.spec_from_file_location('m', '$f')
           mod = importlib.util.module_from_spec(spec)
           spec.loader.exec_module(mod)
           print('imported ok:', mod.app.name)
           "
           done
+
+      - name: docker compose config is valid
+        if: matrix.python == '3.12'
+        working-directory: serve
+        # Resolves interpolation, merges the YAML anchors and validates the
+        # schema. Does not build or pull anything.
+        env:
+          HF_TOKEN: hf_dummy_for_validation
+          NATLAS_API_KEYS: dummy_for_validation
+        run: docker compose config --quiet && echo ok
+
+      - name: The gateway refuses to start without API keys
+        # The single most important misconfiguration to catch: a GPU endpoint
+        # listening to the internet with no authentication.
+        run: |
+          python -c "
+          from natlas_serve.config import ConfigError, Settings
+          try:
+              Settings.from_env({})
+          except ConfigError as exc:
+              assert 'refuses to start wide open' in str(exc), exc
+              print('ok - refused:', str(exc).splitlines()[0])
+          else:
+              raise SystemExit('FAIL: the gateway started with no API keys')
+          "
 
   # ---------------------------------------------------------------------------
   # Repo hygiene: no secrets, no model weights, no wrapped foreign LLMs
