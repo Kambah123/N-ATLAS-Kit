@@ -28,6 +28,16 @@ import tempfile
 from pathlib import Path
 
 import numpy as np
+import numpy.typing as npt
+
+#: 16 kHz mono signed-16-bit PCM - what ffmpeg hands us and what the splitter
+#: works on. Spelled out rather than bare ``np.ndarray`` because older numpy
+#: releases give ``ndarray`` no default type parameters, and mypy's strict mode
+#: then rejects the bare form.
+Pcm16 = npt.NDArray[np.int16]
+
+#: Normalised [-1, 1] audio, the form Whisper's feature extractor expects.
+Float32 = npt.NDArray[np.float32]
 
 #: Sample rate the Whisper Small encoders expect.
 SAMPLE_RATE = 16_000
@@ -74,7 +84,7 @@ def ffmpeg_binary() -> str:
     return found
 
 
-def decode_to_mono16k(data: bytes, *, filename: str | None = None) -> np.ndarray:
+def decode_to_mono16k(data: bytes, *, filename: str | None = None) -> Pcm16:
     """Decode arbitrary audio bytes to 16 kHz mono signed-16-bit PCM.
 
     Handles ogg/opus (WhatsApp voice notes), mp3, m4a/mp4, wav, webm, flac -
@@ -136,23 +146,23 @@ def decode_to_mono16k(data: bytes, *, filename: str | None = None) -> np.ndarray
     return samples
 
 
-def duration_seconds(samples: np.ndarray, sample_rate: int = SAMPLE_RATE) -> float:
+def duration_seconds(samples: npt.NDArray[np.generic], sample_rate: int = SAMPLE_RATE) -> float:
     """Exact duration of decoded PCM. No ffprobe round-trip needed."""
     return round(len(samples) / sample_rate, 3)
 
 
-def _frame_rms(window: np.ndarray, frame: int) -> np.ndarray:
+def _frame_rms(window: Pcm16, frame: int) -> Float32:
     """Short-time RMS over non-overlapping frames."""
     usable = (len(window) // frame) * frame
     if usable == 0:
         return np.empty(0, dtype=np.float32)
     frames = window[:usable].astype(np.float32).reshape(-1, frame)
-    rms: np.ndarray = np.sqrt(np.mean(frames * frames, axis=1))
+    rms: Float32 = np.sqrt(np.mean(frames * frames, axis=1))
     return rms
 
 
 def find_cut(
-    samples: np.ndarray,
+    samples: Pcm16,
     start: int,
     *,
     chunk_seconds: float = DEFAULT_CHUNK_SECONDS,
@@ -201,18 +211,18 @@ def find_cut(
 
 
 def split_audio(
-    samples: np.ndarray,
+    samples: Pcm16,
     *,
     chunk_seconds: float = DEFAULT_CHUNK_SECONDS,
     max_seconds: float = MAX_SEGMENT_SECONDS,
     search_seconds: float = SEARCH_SECONDS,
     sample_rate: int = SAMPLE_RATE,
-) -> list[np.ndarray]:
+) -> list[Pcm16]:
     """Split PCM into segments each at most ``max_seconds`` long."""
     if len(samples) == 0:
         return []
 
-    chunks: list[np.ndarray] = []
+    chunks: list[Pcm16] = []
     position = 0
     while position < len(samples):
         cut = find_cut(
@@ -230,7 +240,7 @@ def split_audio(
     return chunks
 
 
-def to_float32(samples: np.ndarray) -> np.ndarray:
+def to_float32(samples: Pcm16) -> Float32:
     """Convert int16 PCM to the [-1, 1] float32 Whisper's processor expects."""
     return samples.astype(np.float32) / 32768.0
 
@@ -240,7 +250,7 @@ def prepare(
     *,
     filename: str | None = None,
     chunk_seconds: float = DEFAULT_CHUNK_SECONDS,
-) -> tuple[list[np.ndarray], float]:
+) -> tuple[list[Pcm16], float]:
     """Decode an upload and split it ready for the ASR model.
 
     Returns the chunks and the total duration in seconds.

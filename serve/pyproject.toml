@@ -52,7 +52,11 @@ markers = [
 ]
 
 [tool.mypy]
-python_version = "3.10"
+# No `python_version` pin on purpose. Pinning it to our 3.10 floor makes
+# mypy parse the *installed* numpy stubs as 3.10 source, and numpy >= 2.5
+# writes them with PEP 695 `type` statements, which is a hard parse error.
+# Letting mypy follow the interpreter means the CI matrix checks 3.10 with a
+# real 3.10 and 3.12 with a real 3.12, which is stricter anyway.
 files = ["natlas_serve"]
 strict = true
 warn_unreachable = true

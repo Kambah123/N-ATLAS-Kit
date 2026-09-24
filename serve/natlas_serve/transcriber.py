@@ -13,13 +13,13 @@ from typing import TYPE_CHECKING, Any, Protocol
 from natlas_serve.languages import Language
 
 if TYPE_CHECKING:  # pragma: no cover
-    import numpy as np
+    from natlas_serve.audio import Pcm16
 
 
 class Transcriber(Protocol):
     """What the ASR routes need. Implemented for real below, stubbed in tests."""
 
-    def transcribe(self, samples: np.ndarray, language: Language) -> str:
+    def transcribe(self, samples: Pcm16, language: Language) -> str:
         """Transcribe one <=30 s chunk of 16 kHz mono int16 PCM."""
         ...
 
@@ -95,7 +95,7 @@ class WhisperTranscriber:
         """Force a model into memory ahead of the first real request."""
         self._pipeline(language)
 
-    def transcribe(self, samples: np.ndarray, language: Language) -> str:
+    def transcribe(self, samples: Pcm16, language: Language) -> str:
         from natlas_serve.audio import SAMPLE_RATE, to_float32
 
         asr = self._pipeline(language)

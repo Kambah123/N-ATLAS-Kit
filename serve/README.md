@@ -360,6 +360,11 @@ The audio tests need a real ffmpeg. `tests/conftest.py` finds a system one, or
 falls back to the static build from `imageio-ffmpeg` (a `dev` dependency), so
 `pytest` works on a bare machine. Override with `NATLAS_FFMPEG_BINARY`.
 
+That fallback is **test-only on purpose**: `audio.ffmpeg_binary()` itself
+raises rather than quietly depending on a development dependency, so a
+production container that forgot to install ffmpeg fails at startup instead of
+at the first voice note.
+
 ---
 
 ## ⚠️ What is tested, and what is not
