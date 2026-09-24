@@ -1,6 +1,6 @@
 """Stable facts about N-ATLaS, verified against the Hugging Face model cards.
 
-Verified 2025-09-24. Everything here is descriptive metadata about the real
+Verified 2026-09-24. Everything here is descriptive metadata about the real
 models -- no inference logic lives in this module.
 """
 

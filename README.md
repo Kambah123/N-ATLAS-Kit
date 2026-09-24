@@ -182,7 +182,7 @@ N-ATLAS-Kit/
 
 ## The models
 
-Verified against Hugging Face on 2025-09-24. All five repos are **gated** —
+Verified against Hugging Face on 2026-09-24. All five repos are **gated** —
 accept the terms with a Hugging Face account and supply an `HF_TOKEN`.
 
 ### LLM

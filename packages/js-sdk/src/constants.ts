@@ -1,6 +1,6 @@
 /**
  * Stable facts about N-ATLaS, verified against the Hugging Face model cards
- * on 2025-09-24.
+ * on 2026-09-24.
  *
  * Everything here is descriptive metadata about the real models. No inference
  * logic lives in this file - the client, adapters and helpers land in the
