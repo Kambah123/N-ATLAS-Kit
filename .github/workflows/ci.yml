@@ -1,0 +1,189 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Integration tests are skipped unless this is set. CI never sets it, so the
+  # suite must pass with no network access to any model endpoint.
+  NATLAS_BASE_URL: ""
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # JavaScript / TypeScript: format, lint, typecheck, test, build
+  # ---------------------------------------------------------------------------
+  js:
+    name: JS SDK (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["18", "20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Set up Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify the built package is importable as ESM and CJS
+        working-directory: packages/js-sdk
+        run: |
+          node --input-type=module -e "
+            import { LLM_MODEL_ID, ASR_MODEL_IDS } from './dist/index.js';
+            if (LLM_MODEL_ID !== 'NCAIR1/N-ATLaS') throw new Error('bad ESM export');
+            if (ASR_MODEL_IDS.ha !== 'NCAIR1/Hausa-ASR') throw new Error('bad ESM export');
+            console.log('ESM ok');
+          "
+          node --input-type=commonjs -e "
+            const { LLM_MODEL_ID } = require('./dist/index.cjs');
+            if (LLM_MODEL_ID !== 'NCAIR1/N-ATLaS') throw new Error('bad CJS export');
+            console.log('CJS ok');
+          "
+
+  # ---------------------------------------------------------------------------
+  # Python: ruff, mypy, pytest
+  # ---------------------------------------------------------------------------
+  python:
+    name: Python SDK (${{ matrix.python }})
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/python-sdk
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: packages/python-sdk/pyproject.toml
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check --output-format=github .
+
+      - name: Check formatting (ruff format)
+        run: ruff format --check .
+
+      - name: Type-check (mypy)
+        run: mypy src
+
+      - name: Test
+        run: pytest --cov --cov-report=term-missing
+
+      - name: Build the distribution
+        run: |
+          python -m pip install build
+          python -m build
+
+      - name: Verify the built wheel imports cleanly
+        run: |
+          python -m venv /tmp/verify
+          /tmp/verify/bin/pip install --quiet dist/*.whl
+          /tmp/verify/bin/python -c "
+          import natlas
+          assert natlas.LLM_MODEL_ID == 'NCAIR1/N-ATLaS', natlas.LLM_MODEL_ID
+          assert natlas.ASR_MODEL_IDS['ha'] == 'NCAIR1/Hausa-ASR'
+          print('wheel ok', natlas.__version__)
+          "
+
+  # ---------------------------------------------------------------------------
+  # Repo hygiene: no secrets, no model weights, no wrapped foreign LLMs
+  # ---------------------------------------------------------------------------
+  guardrails:
+    name: Guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: No committed .env files
+        run: |
+          if git ls-files | grep -E '(^|/)\.env($|\.)' | grep -v '\.env\.example$'; then
+            echo "::error::A .env file is tracked by git. Secrets must stay in the environment."
+            exit 1
+          fi
+          echo "ok"
+
+      - name: No model weights committed
+        run: |
+          if git ls-files | grep -Ei '\.(safetensors|gguf|onnx|pt|pth)$|(^|/)pytorch_model\.bin$'; then
+            echo "::error::Model weights are tracked by git. They are gated, huge, and not Apache-2.0."
+            exit 1
+          fi
+          echo "ok"
+
+      - name: No other LLM vendor SDKs in any manifest
+        run: |
+          # Hard rule: N-ATLAS Kit must never wrap GPT, Claude, Gemini or similar.
+          hits=$(git ls-files '*package.json' '*pyproject.toml' 'requirements*.txt' \
+            | xargs grep -nEi '"(openai|@anthropic-ai/sdk|@google/generative-ai|@mistralai/[a-z-]+|cohere-ai|groq-sdk)"|^[[:space:]]*"?(openai|anthropic|google-generativeai|mistralai|cohere|groq)[<>=~!\[" ]' \
+            || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "::error::A foreign LLM SDK is declared as a dependency. N-ATLAS Kit must only call N-ATLaS."
+            exit 1
+          fi
+          echo "ok"
+
+      - name: Every NCAIR model reference is a real repo id
+        run: |
+          # Catches typos like NCAIR-NG/Hausa (which appears in the upstream
+          # model card) or N-ATLAS instead of N-ATLaS in code.
+          bad=$(git ls-files 'packages/**' 'serve/**' 'apps/**' 'examples/**' \
+            | xargs grep -nE 'NCAIR[^1]|NCAIR1/[A-Za-z0-9._-]+' 2>/dev/null \
+            | grep -oE 'NCAIR[A-Za-z0-9-]*/[A-Za-z0-9._-]+' \
+            | sort -u \
+            | grep -vE '^NCAIR1/(N-ATLaS|Hausa-ASR|Igbo-ASR|Yoruba-ASR|NigerianAccentedEnglish)$' \
+            || true)
+          if [ -n "$bad" ]; then
+            echo "$bad"
+            echo "::error::Unknown NCAIR model id referenced. The five real ids are listed in the README."
+            exit 1
+          fi
+          echo "ok"

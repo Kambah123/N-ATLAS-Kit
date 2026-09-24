@@ -1,0 +1,23 @@
+node_modules
+dist
+build
+coverage
+.next
+.vercel
+.turbo
+pnpm-lock.yaml
+*.min.js
+*.ipynb
+
+# Python is formatted by ruff, not prettier
+packages/python-sdk/
+serve/
+**/__pycache__/
+**/*.py
+
+# Generated evidence / fixtures
+docs/evidence/
+**/*.ogg
+**/*.wav
+**/*.mp3
+**/*.m4a
