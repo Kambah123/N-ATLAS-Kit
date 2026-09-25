@@ -117,7 +117,7 @@ def voice_for(language: str) -> tuple[Language, str | None]:
     return code, None
 
 
-def pcm_to_wav(samples: np.ndarray, sample_rate: int) -> bytes:
+def pcm_to_wav(samples: Any, sample_rate: int) -> bytes:
     """Encode a mono float waveform in ``[-1, 1]`` as 16-bit WAV."""
     if sample_rate < 1:
         raise SpeechError("The speech model returned a bad sample rate.")
