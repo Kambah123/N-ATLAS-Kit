@@ -76,6 +76,11 @@ LLM_CONTEXT_TOKENS = 8092
 
 SECRET_NAME = "natlas-hf"
 
+#: ``check_gpu`` is declared with this GPU. ``--gpu`` retargets it only when
+#: the installed modal client has ``Function.with_options`` (1.4.3+).
+DEFAULT_GPU = "A10"
+WITH_OPTIONS_MIN_VERSION = "1.4.3"
+
 image = modal.Image.debian_slim(python_version="3.11").pip_install("huggingface_hub>=0.24")
 
 app = modal.App("natlas-preflight", image=image)
@@ -146,7 +151,7 @@ def check_hf_access() -> dict[str, Any]:
 # --------------------------------------------------------------------------
 
 
-@app.function(gpu="A10", timeout=600)
+@app.function(gpu=DEFAULT_GPU, timeout=600)
 def check_gpu() -> dict[str, Any]:
     """Report what Modal actually gave us. Measured, not assumed."""
     import subprocess
@@ -193,6 +198,64 @@ def check_gpu() -> dict[str, Any]:
 
 TICK = "\u2713"
 CROSS = "\u2717"
+
+
+class GpuClientTooOldError(Exception):
+    """``--gpu`` cannot be applied because this modal client has no ``with_options``."""
+
+
+def prepare_gpu_check(function: Any, gpu: str) -> tuple[Any, str | None]:
+    """Return ``(runner, note)``.
+
+    ``runner.remote()`` performs the check. On modal >= 1.4.3, ``runner`` is
+    ``function.with_options(gpu=gpu)``. Older clients can still call the
+    function as declared (``DEFAULT_GPU``). Requesting any other GPU raises
+    :class:`GpuClientTooOldError` instead of an ``AttributeError``.
+    """
+    override = getattr(function, "with_options", None)
+    if callable(override):
+        return override(gpu=gpu), None
+    if gpu == DEFAULT_GPU:
+        return function, (
+            "This modal client has no Function.with_options "
+            f"(added in {WITH_OPTIONS_MIN_VERSION}). "
+            f"Running the default {DEFAULT_GPU} check."
+        )
+    raise GpuClientTooOldError(
+        f"Cannot request GPU {gpu!r}: Function.with_options needs modal >= "
+        f"{WITH_OPTIONS_MIN_VERSION}. This client can only run the function's "
+        f"pinned GPU ({DEFAULT_GPU})."
+    )
+
+
+def format_gpu_failure(exc: BaseException) -> str:
+    """Explain a GPU scheduling failure without blaming the wrong cause.
+
+    A missing ``with_options`` is a client-version error. Billing is mentioned
+    only when the exception itself talks about a payment method.
+    """
+    detail = f"{type(exc).__name__}: {exc}"
+    lowered = detail.lower()
+    if isinstance(exc, AttributeError) and "with_options" in lowered:
+        return (
+            f"  {CROSS} {detail}\n"
+            "      This is a client-version error, not a missing payment method.\n"
+            f"      Function.with_options needs modal >= {WITH_OPTIONS_MIN_VERSION}.\n"
+            f"      Upgrade with: pip install -U 'modal>={WITH_OPTIONS_MIN_VERSION}'"
+        )
+    if "payment method" in lowered or "billing" in lowered or "status 402" in lowered:
+        return (
+            f"  {CROSS} Could not get a GPU: {detail}\n"
+            "      Modal requires a payment method before it will schedule a GPU.\n"
+            "      Add one at https://modal.com/settings/billing"
+        )
+    return (
+        f"  {CROSS} Could not get a GPU: {detail}\n"
+        "      Modal returned the error above. A missing payment method is one\n"
+        "      possible cause (https://modal.com/settings/billing), but only when\n"
+        "      the message says so. Other causes include GPU quota, an unknown\n"
+        "      GPU name, or a workspace restriction."
+    )
 
 
 def _rule(title: str = "") -> None:
@@ -242,14 +305,27 @@ def main(gpu: str = "A10", skip_gpu: bool = False) -> None:
     else:
         _rule(f"2. GPU allocation and VRAM headroom (requested: {gpu})")
         try:
-            info = check_gpu.with_options(gpu=gpu).remote()
-        except Exception as exc:
-            print(f"  {CROSS} Could not get a GPU: {type(exc).__name__}: {exc}")
-            print("      Most likely cause: no payment method on file.")
-            print("      Modal requires one before it will schedule any GPU.")
-            print("      Add one at https://modal.com/settings/billing")
-            failures.append("GPU unavailable")
-            info = {"ok": False}
+            runner, note = prepare_gpu_check(check_gpu, gpu)
+        except GpuClientTooOldError as exc:
+            print(f"  {CROSS} {exc}")
+            print(f"      Falling back to the pinned {DEFAULT_GPU} check.")
+            print(f"      Upgrade with: pip install -U 'modal>={WITH_OPTIONS_MIN_VERSION}'")
+            failures.append(f"requested GPU {gpu} but this modal client can only run {DEFAULT_GPU}")
+            try:
+                info = check_gpu.remote()
+            except Exception as fallback_exc:
+                print(format_gpu_failure(fallback_exc))
+                failures.append("GPU unavailable")
+                info = {"ok": False}
+        else:
+            if note:
+                print(f"  ! {note}")
+            try:
+                info = runner.remote()
+            except Exception as exc:
+                print(format_gpu_failure(exc))
+                failures.append("GPU unavailable")
+                info = {"ok": False}
 
         if info.get("ok"):
             print(f"  {TICK} Got a {info['name']}")

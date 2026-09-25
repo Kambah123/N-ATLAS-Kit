@@ -17,6 +17,9 @@ FROM vllm/vllm-openai:${VLLM_VERSION}
 # need to run three different commands, so clear it and use CMD instead.
 ENTRYPOINT []
 
+# v0.11.0 provides python3 only. docker-compose starts vLLM with `python`.
+RUN ln -sf "$(command -v python3)" /usr/local/bin/python
+
 # ffmpeg is the one non-Python dependency: every upload is normalised to
 # 16 kHz mono PCM before it reaches Whisper.
 RUN apt-get update \
