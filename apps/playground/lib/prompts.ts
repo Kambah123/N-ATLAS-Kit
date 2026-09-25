@@ -79,22 +79,66 @@ export function systemPrompt(language: ChatLanguage, explicit: boolean): string 
   return lines.join('\n');
 }
 
+/** Spoken replies stay short enough to finish in one breath. */
+export const SPOKEN_MAX_TOKENS = 128;
+
+export const PIDGIN_TURN_REMINDER =
+  'Reply in Nigerian Pidgin only. Not Igbo, not Yoruba, not Hausa. Example: "Abeg, how you dey? I dey fine."';
+
+export const SPOKEN_TURN_REMINDER =
+  'Reply in 2 or 3 short plain sentences. No lists, no markdown, no headings.';
+
+export function replyMaxTokens(requested: number, spoken: boolean): number {
+  if (!spoken) return requested;
+  return Math.min(requested, SPOKEN_MAX_TOKENS);
+}
+
+/**
+ * The latest user turn carries the Pidgin reminder. A system line alone loses
+ * to earlier Igbo or Yoruba replies still sitting in the history.
+ */
 export function buildChatTurn(
   hint: ChatLanguage,
   history: readonly { role: 'user' | 'assistant'; content: string }[],
+  options?: { spoken?: boolean },
 ): { language: ChatLanguage; messages: ChatMessagePayload[] } {
-  const latest = [...history].reverse().find((message) => message.role === 'user')?.content ?? '';
+  const spoken = options?.spoken === true;
+  const visible = history.filter((message) => message.content.trim().length > 0);
+  const latest = [...visible].reverse().find((message) => message.role === 'user')?.content ?? '';
   const requested = requestedLanguage(latest);
   const language = requested ?? hint;
-  return {
-    language,
-    messages: [
-      { role: 'system', content: systemPrompt(language, requested !== null) },
-      ...history
-        .filter((message) => message.content.trim().length > 0)
-        .map((message) => ({ role: message.role, content: message.content })),
-    ],
-  };
+  let lastUserSeen = false;
+  const messages: ChatMessagePayload[] = [
+    { role: 'system', content: spokenSystem(language, requested !== null, spoken) },
+  ];
+  for (let index = visible.length - 1; index >= 0; index -= 1) {
+    const message = visible[index];
+    if (!message) continue;
+    if (!lastUserSeen && message.role === 'user') {
+      lastUserSeen = true;
+      messages.splice(1, 0, {
+        role: 'user',
+        content: withTurnReminder(message.content, language, spoken),
+      });
+      continue;
+    }
+    messages.splice(1, 0, { role: message.role, content: message.content });
+  }
+  return { language, messages };
+}
+
+function spokenSystem(language: ChatLanguage, explicit: boolean, spoken: boolean): string {
+  const base = systemPrompt(language, explicit);
+  if (!spoken) return base;
+  return `${base}\n${SPOKEN_TURN_REMINDER}`;
+}
+
+function withTurnReminder(content: string, language: ChatLanguage, spoken: boolean): string {
+  const extra: string[] = [];
+  if (language === 'pcm') extra.push(PIDGIN_TURN_REMINDER);
+  if (spoken) extra.push(SPOKEN_TURN_REMINDER);
+  if (extra.length === 0) return content;
+  return `${content}\n\n${extra.join(' ')}`;
 }
 
 function languageFromToken(token: string): ChatLanguage | null {

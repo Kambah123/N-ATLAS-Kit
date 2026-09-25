@@ -39,7 +39,7 @@ client.chat.completions.create(
 |---|---|---|---|
 | `POST` | `/v1/chat/completions` | Bearer | `NCAIR1/N-ATLaS` via vLLM. Streaming supported. |
 | `POST` | `/v1/audio/transcriptions` | Bearer | Routes to the NCAIR1 ASR model for `language`. |
-| `POST` | `/v1/audio/speech` | Bearer | MMS-TTS for `ha`, `ig`, `yo`, and `en`. Pidgin (`pcm`) is read in English and the response says so. Needs a Modal redeploy before it exists on the live gateway. |
+| `POST` | `/v1/audio/speech` | Bearer | MMS-TTS for `ha`, `yo`, and `en`. Igbo uses `Shinzmann/soro-tts-ibo` because `facebook/mms-tts-ibo` is gone. Pidgin (`pcm`) is read in English and the response says so. Clips are loudness-normalized. |
 | `GET`  | `/v1/models` | Bearer | Proxied from vLLM. |
 | `GET`  | `/health` | none | Upstream status. Safe for a load balancer. |
 

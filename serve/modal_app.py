@@ -90,6 +90,13 @@ image = (
         "numpy>=1.26",
         # transformers/torch/accelerate are already in the base image.
     )
+    # facebook/mms-tts-ibo returns 401. Bake the replacement into the image
+    # (not the HF volume, which hides this path at runtime) so Igbo speech
+    # does not download on the first request after deploy.
+    .run_commands(
+        'python -c "from huggingface_hub import snapshot_download; '
+        "snapshot_download('Shinzmann/soro-tts-ibo', local_dir='/opt/natlas-voices/ig')\""
+    )
     .env(
         {
             "HF_HOME": HF_CACHE_DIR,
@@ -185,7 +192,8 @@ class NatlasService:
         hf_cache.commit()
 
         transcriber = WhisperTranscriber(settings.asr_models, device=settings.asr_device)
-        # MMS voices load on the first speak request, not during this cold start.
+        # Igbo weights are baked into the image. The other MMS voices load on
+        # the first speak request, not during this cold start.
         from natlas_serve.tts import MmsSpeaker
 
         self.app = gateway.create_app(

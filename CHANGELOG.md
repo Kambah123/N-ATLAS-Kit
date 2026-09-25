@@ -18,6 +18,17 @@ together from this file.
 
 ### Fixed
 
+- Spoken Igbo uses `Shinzmann/soro-tts-ibo`. The original `facebook/mms-tts-ibo`
+  checkpoint now returns 401. The Modal image downloads the replacement at
+  deploy time, and every voice is loudness-normalized.
+- Voice replies from the mic, or while Auto-speak is on, stay to two or three
+  plain sentences. Chat bubbles render markdown, and speech strips it.
+- Pidgin replies repeat a short Nigerian Pidgin example on the latest user
+  turn, using the language selected at send time.
+- A failed chat clears the empty "Thinking…" bubble and shows the error.
+  Voice status names Listening, Transcribing, Thinking, Preparing voice, and
+  Speaking, and Stop appears only while audio is playing.
+
 - On screens 768px and narrower, the playground footer scrolls in after the
   app instead of staying pinned, the chat composer stays on screen, and
   suggestion chips sit on one horizontal row.
@@ -30,8 +41,9 @@ together from this file.
 
 - Playground voice chat: the mic transcribes with the existing NCAIR1 speech
   models and sends the text to N-ATLaS. Assistant replies have play/stop, and
-  an Auto toggle reads them aloud. Hausa, Igbo, Yorùbá, and English use MMS-TTS
-  after a Modal redeploy; until then the browser voice is used when one exists.
+  an Auto toggle reads them aloud. Hausa, Yorùbá, and English use MMS-TTS.
+  Igbo uses `Shinzmann/soro-tts-ibo`. Until the gateway is redeployed, the
+  browser voice is used when one exists.
   Pidgin is recognized with the Nigerian English model and read in English,
   with a note.
 - Starter apps in `templates/`: a Hausa support chatbot, a farmer-advice bot,

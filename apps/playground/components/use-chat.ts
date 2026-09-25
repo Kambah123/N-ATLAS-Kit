@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE, MAX_MESSAGE_CHARS } from '@/lib/limits';
-import { buildChatTurn, PROMPT_LANGUAGE_NAME } from '@/lib/prompts';
+import { buildChatTurn, PROMPT_LANGUAGE_NAME, replyMaxTokens } from '@/lib/prompts';
 import { deltaFromEvent, errorMessage, messageFromCompletion, takeSseData } from '@/lib/sse';
 import { LLM_MODEL_ID, type ChatLanguage, type ChatRequestBody } from '@/lib/types';
 import { type LastAction } from '@/components/types';
@@ -31,33 +31,29 @@ export function useChat({ configured, onAction }: UseChatOptions) {
   const [notice, setNotice] = useState<string | null>(null);
   const busyRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
+  const languageRef = useRef(language);
+  const messagesRef = useRef(messages);
+  const temperatureRef = useRef(temperature);
+  const maxTokensRef = useRef(maxTokens);
+  languageRef.current = language;
+  messagesRef.current = messages;
+  temperatureRef.current = temperature;
+  maxTokensRef.current = maxTokens;
   const slow = useSlow(busy);
 
   useEffect(() => {
     return () => abortRef.current?.abort();
   }, []);
 
-  const buildBody = useCallback(
-    (history: VisibleMessage[], stream: boolean, hint: ChatLanguage): ChatRequestBody => {
-      const turn = buildChatTurn(hint, history);
-      return {
-        model: LLM_MODEL_ID,
-        messages: turn.messages,
-        temperature: Math.round(temperature * 10) / 10,
-        max_tokens: maxTokens,
-        stream,
-        language: turn.language,
-      };
-    },
-    [maxTokens, temperature],
-  );
-
   const stop = useCallback(() => {
     abortRef.current?.abort();
   }, []);
 
   const send = useCallback(
-    async (text: string, options?: { language?: ChatLanguage; fromTranscript?: boolean }) => {
+    async (
+      text: string,
+      options?: { language?: ChatLanguage; fromTranscript?: boolean; spoken?: boolean },
+    ) => {
       const content = text.trim();
       if (!content || busyRef.current) return;
       if (content.length > MAX_MESSAGE_CHARS) {
@@ -71,14 +67,25 @@ export function useChat({ configured, onAction }: UseChatOptions) {
         return;
       }
 
-      const hint = options?.language ?? language;
+      // Read the dropdown at send time. A mic callback started under another
+      // language must not keep that language after the user switches.
+      const hint = options?.language ?? languageRef.current;
       if (options?.language) setLanguage(options.language);
+      const spoken = options?.spoken === true || options?.fromTranscript === true;
       const history = [
-        ...messages,
+        ...messagesRef.current,
         { id: newId(), role: 'user' as const, content, language: hint },
       ];
+      const turn = buildChatTurn(hint, history, { spoken });
       const assistantId = newId();
-      const body = buildBody(history, true, hint);
+      const body: ChatRequestBody = {
+        model: LLM_MODEL_ID,
+        messages: turn.messages,
+        temperature: Math.round(temperatureRef.current * 10) / 10,
+        max_tokens: replyMaxTokens(maxTokensRef.current, spoken),
+        stream: true,
+        language: turn.language,
+      };
       if (options?.fromTranscript) {
         const replyLanguage = PROMPT_LANGUAGE_NAME[body.language];
         setNotice(`Added the transcript to this chat. Replying in ${replyLanguage}.`);
@@ -87,7 +94,7 @@ export function useChat({ configured, onAction }: UseChatOptions) {
       }
       setMessages([
         ...history,
-        { id: assistantId, role: 'assistant', content: '', language: hint },
+        { id: assistantId, role: 'assistant', content: '', language: turn.language },
       ]);
       setDraft('');
       setError(null);
@@ -148,9 +155,15 @@ export function useChat({ configured, onAction }: UseChatOptions) {
           }
         }
         if (!assembled.trim()) {
+          setMessages((current) => current.filter((message) => message.id !== assistantId));
           setError('N-ATLaS returned an empty reply.');
         }
       } catch (caught) {
+        setMessages((current) =>
+          current.filter(
+            (message) => message.id !== assistantId || message.content.trim().length > 0,
+          ),
+        );
         if (caught instanceof Error && caught.name === 'AbortError') {
           setError('Stopped.');
         } else {
@@ -162,7 +175,7 @@ export function useChat({ configured, onAction }: UseChatOptions) {
         abortRef.current = null;
       }
     },
-    [buildBody, configured, language, messages, onAction],
+    [configured, onAction],
   );
 
   const clear = useCallback(() => {

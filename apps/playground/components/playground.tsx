@@ -121,7 +121,7 @@ export function Playground({ configured }: { configured: boolean }) {
   const codeBeside = tab !== 'code';
 
   return (
-    <div className="bg-[var(--bg)] text-[var(--ink)] max-[768px]:h-[var(--app-height,100dvh)] max-[768px]:overflow-y-auto min-[769px]:flex min-[769px]:h-dvh min-[769px]:max-w-full min-[769px]:flex-col min-[769px]:overflow-hidden">
+    <div className="bg-[var(--bg)] text-[var(--ink)] max-[768px]:h-[var(--app-height,100dvh)] max-[768px]:overflow-x-hidden max-[768px]:overflow-y-auto min-[769px]:flex min-[769px]:h-dvh min-[769px]:max-w-full min-[769px]:flex-col min-[769px]:overflow-hidden">
       <div className="flex max-w-full flex-col overflow-hidden max-[768px]:h-[var(--app-height,100dvh)] min-[769px]:min-h-0 min-[769px]:flex-1">
         <header className="relative shrink-0 overflow-hidden border-b border-black/20 bg-[var(--header)] text-[var(--header-ink)]">
           <svg

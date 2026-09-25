@@ -1,19 +1,23 @@
 """Text-to-speech for the languages the playground can speak.
 
-Hausa, Igbo, Yorùbá, and English use Meta's MMS-TTS checkpoints
-(``facebook/mms-tts-*``). They are small VITS models and run on CPU.
-Nigerian Pidgin has no MMS voice; callers get the English voice plus a note.
+Hausa, Yorùbá, and English use Meta's MMS-TTS checkpoints. The original
+``facebook/mms-tts-ibo`` checkpoint now returns 401, so Igbo uses
+``Shinzmann/soro-tts-ibo``, a VITS fine-tune of that checkpoint under the
+same CC-BY-NC 4.0 licence. Nigerian Pidgin has no voice; callers get the
+English voice plus a note.
 
-The weights are CC-BY-NC 4.0. This module does not download them at import
-time. The first ``MmsSpeaker.synthesize`` call for a language loads that
-one model.
+Weights are not downloaded at import time. The Modal image prefetches the
+Igbo voice into ``/opt/natlas-voices/ig``. Other voices load on first use.
+Every clip is loudness-normalized so one language is not much quieter.
 """
 
 from __future__ import annotations
 
 import io
+import re
 import wave
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Final, Literal, Protocol
 
 import numpy as np
@@ -22,12 +26,24 @@ from natlas_serve.languages import Language
 
 SpeechCode = Literal["ha", "ig", "yo", "en", "pcm"]
 
+#: ``facebook/mms-tts-ibo`` is gone (401). This fine-tune still loads as VITS.
+IGBO_MODEL_ID: Final = "Shinzmann/soro-tts-ibo"
+
 MMS_MODEL_IDS: Final[dict[Language, str]] = {
     "ha": "facebook/mms-tts-hau",
-    "ig": "facebook/mms-tts-ibo",
+    "ig": IGBO_MODEL_ID,
     "yo": "facebook/mms-tts-yor",
     "en": "facebook/mms-tts-eng",
 }
+
+#: Baked into the Modal image so the first Igbo request does not download.
+BUNDLED_VOICE_DIR: Final[dict[Language, str]] = {
+    "ig": "/opt/natlas-voices/ig",
+}
+
+#: About -24 dBFS. Quiet Yoruba clips and louder Hausa clips land together.
+TARGET_RMS: Final = 0.06
+PEAK_LIMIT: Final = 0.95
 
 PIDGIN_NOTE: Final = "Nigerian Pidgin has no dedicated voice. This reply is read in English."
 
@@ -98,15 +114,58 @@ def normalise_speech_language(value: object) -> SpeechCode:
     return _SPEECH_ALIASES[key]
 
 
+_MD_LINK = re.compile(r"\[([^\]]+)\]\([^)]+\)")
+_MD_CODE = re.compile(r"`{1,3}([^`]*)`{1,3}")
+_MD_BOLD = re.compile(r"(\*\*|__)(.+?)\1")
+_MD_ITALIC = re.compile(r"(?<![*\w])[*_]([^*_\n]+)[*_](?!\w)")
+_MD_HEADING = re.compile(r"(?m)^#{1,6}\s+")
+_MD_LIST = re.compile(r"(?m)^\s*(?:[-*+]|\d+[.)])\s+")
+
+
+def strip_markdown(text: str) -> str:
+    """Drop chat markup so a voice does not read asterisks and list numbers."""
+    cleaned = _MD_LINK.sub(r"\1", text)
+    cleaned = _MD_CODE.sub(r"\1", cleaned)
+    cleaned = _MD_BOLD.sub(r"\2", cleaned)
+    cleaned = _MD_ITALIC.sub(r"\1", cleaned)
+    cleaned = cleaned.replace("**", "").replace("__", "")
+    cleaned = _MD_HEADING.sub("", cleaned)
+    cleaned = _MD_LIST.sub("", cleaned)
+    return cleaned
+
+
 def prepare_speech_text(text: object) -> str:
     if not isinstance(text, str):
         raise ValueError("Speech input must be a string.")
-    cleaned = " ".join(text.split())
+    cleaned = " ".join(strip_markdown(text).split())
     if not cleaned:
         raise ValueError("There is nothing to read out.")
     if len(cleaned) > MAX_SPEECH_CHARS:
         cleaned = cleaned[: MAX_SPEECH_CHARS - 1].rstrip() + "…"
     return cleaned
+
+
+def normalize_loudness(samples: Any) -> Any:
+    """Raise quiet clips and tame loud ones to one RMS, then cap the peak."""
+    flat = np.asarray(samples, dtype=np.float32).reshape(-1)
+    if flat.size == 0:
+        return flat
+    rms = float(np.sqrt(np.mean(np.square(flat))))
+    if rms < 1e-5:
+        return flat
+    gained = flat * (TARGET_RMS / rms)
+    peak = float(np.max(np.abs(gained)))
+    if peak > PEAK_LIMIT:
+        gained = gained * (PEAK_LIMIT / peak)
+    return np.asarray(gained, dtype=np.float32)
+
+
+def voice_source(voice: Language) -> str:
+    """A local directory when the Modal image bundled the weights, else the hub id."""
+    folder = BUNDLED_VOICE_DIR.get(voice)
+    if folder and (Path(folder) / "config.json").is_file():
+        return folder
+    return MMS_MODEL_IDS[voice]
 
 
 def voice_for(language: str) -> tuple[Language, str | None]:
@@ -121,7 +180,7 @@ def pcm_to_wav(samples: Any, sample_rate: int) -> bytes:
     """Encode a mono float waveform in ``[-1, 1]`` as 16-bit WAV."""
     if sample_rate < 1:
         raise SpeechError("The speech model returned a bad sample rate.")
-    flat = np.asarray(samples, dtype=np.float32).reshape(-1)
+    flat = normalize_loudness(samples)
     if flat.size == 0:
         raise SpeechError("The speech model returned silence.")
     ints = np.clip(flat, -1.0, 1.0)
@@ -167,23 +226,20 @@ class MmsSpeaker:
         cached = self._loaded.get(voice)
         if cached is not None:
             return cached
-        model_id = MMS_MODEL_IDS[voice]
+        model_id = voice_source(voice)
         try:
             from transformers import AutoTokenizer, VitsModel
         except ImportError as exc:
             raise SpeechError(
-                "The speech libraries are not installed in this environment. "
-                "Redeploy the Modal app from a checkout that includes TTS."
+                "The speech libraries are not installed in this environment."
             ) from exc
         try:
             tokenizer = AutoTokenizer.from_pretrained(model_id)
             model = VitsModel.from_pretrained(model_id)
             model.eval()
         except Exception as exc:
-            raise SpeechError(
-                f"Could not load the {voice} voice ({model_id}). "
-                "On Modal, confirm the Hugging Face cache volume is mounted and redeploy."
-            ) from exc
+            name = {"ha": "Hausa", "ig": "Igbo", "yo": "Yoruba", "en": "English"}[voice]
+            raise SpeechError(f"Spoken {name} isn't available right now.") from exc
         loaded = (model, tokenizer)
         self._loaded[voice] = loaded
         return loaded
