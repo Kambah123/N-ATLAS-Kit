@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: Which packages to publish
+        required: true
+        type: choice
+        default: both
+        options:
+          - both
+          - js
+          - python
+  push:
+    tags:
+      - "js-v*"
+      - "py-v*"
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # npm: n-atlas. Provenance needs id-token: write on a public repository.
+  # ---------------------------------------------------------------------------
+  js:
+    name: Publish n-atlas (npm)
+    if: >-
+      (github.event_name == 'workflow_dispatch' && (inputs.packages == 'js' || inputs.packages == 'both')) ||
+      startsWith(github.ref, 'refs/tags/js-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build n-atlas
+        run: pnpm --filter n-atlas build
+
+      - name: Check NPM_TOKEN
+        id: npm_token
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "NPM_TOKEN is not set. Skipping npm publish for n-atlas."
+            echo "Create a Granular Access Token with publish rights for all packages, save it as the repository secret NPM_TOKEN, then re-run this workflow. Steps: docs/RELEASING.md."
+            echo "::warning::NPM_TOKEN is missing. npm publish was skipped. See docs/RELEASING.md."
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.npm_token.outputs.present == 'true'
+        working-directory: packages/js-sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
+
+  # ---------------------------------------------------------------------------
+  # PyPI: natlas. Trusted Publishing (OIDC). No API token.
+  # The GitHub environment name must be exactly `pypi`.
+  # ---------------------------------------------------------------------------
+  python:
+    name: Publish natlas (PyPI)
+    if: >-
+      (github.event_name == 'workflow_dispatch' && (inputs.packages == 'python' || inputs.packages == 'both')) ||
+      startsWith(github.ref, 'refs/tags/py-v')
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build natlas
+        working-directory: packages/python-sdk
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/python-sdk/dist

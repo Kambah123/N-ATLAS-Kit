@@ -61,7 +61,7 @@ def test_chat_posts_an_openai_compatible_completion() -> None:
     assert result.usage.total_tokens == 15
     request = route.calls.last.request
     assert request.headers["authorization"] == "Bearer test-key"
-    assert request.headers["user-agent"] == "natlas/0.0.0"
+    assert request.headers["user-agent"] == "natlas/0.1.0"
     body = json.loads(request.content)
     assert body == {
         "model": "NCAIR1/N-ATLaS",

@@ -99,7 +99,7 @@ describe('chat', () => {
     expect(call?.url).toBe('http://natlas.test/v1/chat/completions');
     expect(call?.headers.get('authorization')).toBe('Bearer test-key');
     expect(call?.headers.get('content-type')).toBe('application/json');
-    expect(call?.headers.get('user-agent')).toBe('n-atlas/0.0.0');
+    expect(call?.headers.get('user-agent')).toBe('n-atlas/0.1.0');
     expect(await bodyJson(call!)).toEqual({
       model: 'NCAIR1/N-ATLaS',
       messages: userMessage,

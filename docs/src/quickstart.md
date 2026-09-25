@@ -38,6 +38,14 @@ Node.js 20 or newer. The package name is `n-atlas`.
 npm install n-atlas
 ```
 
+`n-atlas` is not on npm yet. Not on npm/PyPI yet? Install from GitHub. The
+repository must be public. `npm install` of the repository URL installs the
+private workspace root, not this package.
+
+```bash
+pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk"
+```
+
 In this monorepo, build the workspace package instead of installing from npm
 (the published version may lag the source):
 
@@ -81,6 +89,13 @@ Python 3.10 or newer. The package name is `natlas`.
 
 ```bash
 pip install natlas
+```
+
+`natlas` is not on PyPI yet. Not on npm/PyPI yet? Install from GitHub. The
+repository must be public.
+
+```bash
+pip install "git+https://github.com/Kambah123/N-ATLAS-Kit.git#subdirectory=packages/python-sdk"
 ```
 
 From this repository:

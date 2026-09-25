@@ -3,6 +3,10 @@
 Package: `natlas`. Source: `packages/python-sdk`. Python 3.10+. Sync and async
 clients both use `httpx`. Responses are Pydantic models.
 
+`pip install natlas` works after the package is published. It is not on PyPI
+yet. Not on npm/PyPI yet? Install from GitHub (the repository must be public):
+`pip install "git+https://github.com/Kambah123/N-ATLAS-Kit.git#subdirectory=packages/python-sdk"`.
+
 ```python
 from natlas import NAtlas
 

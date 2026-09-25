@@ -37,6 +37,9 @@ describe('renderSnippets', () => {
     expect(snippets.curl).toContain('/chat/completions');
     expect(SDK_NOTE).toContain('n-atlas');
     expect(SDK_NOTE).toContain('natlas');
+    expect(SDK_NOTE).toContain('Not on npm/PyPI yet');
+    expect(SDK_NOTE).toContain('subdirectory=packages/python-sdk');
+    expect(SDK_NOTE).toContain('must be public');
   });
 
   it('omits pcm from the SDK calls because n-atlas and natlas reject it', () => {
