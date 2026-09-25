@@ -21,6 +21,7 @@ export default tseslint.config(
       'serve/**',
       'docs/.vitepress/cache/**',
       'docs/.vitepress/dist/**',
+      'templates/**',
     ],
   },
   js.configs.recommended,

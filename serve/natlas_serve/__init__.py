@@ -5,6 +5,7 @@ OpenAI-compatible base URL:
 
 * ``POST /v1/chat/completions``     -> ``NCAIR1/N-ATLaS`` via vLLM, streaming
 * ``POST /v1/audio/transcriptions`` -> the matching ``NCAIR1`` Whisper model
+* ``POST /v1/audio/speech``         -> MMS-TTS (Hausa, Igbo, Yoruba, English)
 * ``GET  /health``                  -> upstream status, unauthenticated
 
 Deployed either as three containers (``docker-compose.yml``) or as a single

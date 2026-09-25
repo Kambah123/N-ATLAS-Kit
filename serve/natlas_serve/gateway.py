@@ -4,6 +4,7 @@ One base URL, one API key, both capabilities:
 
 * ``POST /v1/chat/completions``     proxied to vLLM, streaming preserved
 * ``POST /v1/audio/transcriptions`` served in-process or proxied to the ASR box
+* ``POST /v1/audio/speech``         MMS-TTS when a speaker is configured
 * ``GET  /v1/models``               proxied
 * ``GET  /health``                  unauthenticated, reports both upstreams
 
@@ -28,6 +29,7 @@ Caller-supplied values are left unchanged.
 
 from __future__ import annotations
 
+import asyncio
 import hmac
 import json
 import math
@@ -52,6 +54,7 @@ from natlas_serve.observability import (
     log_request,
     new_request_id,
 )
+from natlas_serve.tts import Speaker, SpeechError, UnsupportedSpeechLanguageError
 
 #: Required by the N-ATLaS Terms of Use, and surfaced on /health so anyone
 #: integrating sees it without reading the licence.
@@ -176,12 +179,16 @@ def create_app(
     *,
     asr_router: APIRouter | None = None,
     client: httpx.AsyncClient | None = None,
+    speaker: Speaker | None = None,
 ) -> FastAPI:
     """Build the gateway.
 
     ``asr_router`` mounts transcription in-process (the Modal single-container
     deployment). Without it, transcription is proxied to ``settings.asr_url``
     (the docker-compose deployment).
+
+    ``speaker`` serves ``POST /v1/audio/speech``. Without one, that route
+    answers 501 so clients can fall back to a browser voice.
     """
     settings = settings or Settings.from_env()
     configure_logging()
@@ -446,5 +453,71 @@ def create_app(
                 status_code=resp.status_code,
                 media_type=resp.headers.get("content-type", "application/json"),
             )
+
+    @app.post("/v1/audio/speech")
+    async def speech(request: Request) -> Response:  # pyright: ignore[reportUnusedFunction]
+        key = require_auth(request)
+        watch = Stopwatch()
+        entry = RequestLog(
+            request_id=request.state.request_id,
+            feature="speech",
+            method="POST",
+            path="/v1/audio/speech",
+            key=key_fingerprint(key),
+        )
+        if speaker is None:
+            entry.status, entry.error = 501, "speech_unavailable"
+            entry.latency_ms = watch.ms
+            log_request(entry)
+            raise HTTPException(
+                501,
+                "Spoken replies are not enabled on this gateway. "
+                "Redeploy Modal so MMS-TTS is loaded, or use a browser voice.",
+            )
+        try:
+            payload = await request.json()
+        except json.JSONDecodeError as exc:
+            entry.status, entry.error = 400, "invalid_json"
+            entry.latency_ms = watch.ms
+            log_request(entry)
+            raise HTTPException(400, "Speech requests must be JSON.") from exc
+        if not isinstance(payload, dict):
+            entry.status, entry.error = 400, "invalid_json"
+            entry.latency_ms = watch.ms
+            log_request(entry)
+            raise HTTPException(400, "Speech requests must be a JSON object.")
+        text = payload.get("input", payload.get("text", ""))
+        language = payload.get("language", "en")
+        if not isinstance(language, str):
+            language = "en"
+        entry.language = language if isinstance(language, str) else None
+        try:
+            clip = await asyncio.to_thread(
+                speaker.synthesize,
+                text if isinstance(text, str) else "",
+                language,
+            )
+        except UnsupportedSpeechLanguageError as exc:
+            entry.status, entry.error = 400, "unsupported_language"
+            entry.latency_ms = watch.ms
+            log_request(entry)
+            raise HTTPException(400, str(exc)) from exc
+        except ValueError as exc:
+            entry.status, entry.error = 400, "invalid_request"
+            entry.latency_ms = watch.ms
+            log_request(entry)
+            raise HTTPException(400, str(exc)) from exc
+        except SpeechError as exc:
+            entry.status, entry.error = 503, "speech_error"
+            entry.latency_ms = watch.ms
+            log_request(entry)
+            raise HTTPException(503, str(exc)) from exc
+        entry.status = 200
+        entry.latency_ms = watch.ms
+        log_request(entry)
+        headers = {"X-Natlas-Voice": clip.voice, "Cache-Control": "no-store"}
+        if clip.note:
+            headers["X-Natlas-Voice-Note"] = clip.note
+        return Response(content=clip.wav, media_type="audio/wav", headers=headers)
 
     return app

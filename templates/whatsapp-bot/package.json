@@ -1,0 +1,14 @@
+{
+  "name": "natlas-whatsapp-bot",
+  "private": true,
+  "type": "module",
+  "description": "WhatsApp Cloud API webhook that replies with n-atlas.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node bot.mjs",
+    "check": "node --check bot.mjs"
+  },
+  "dependencies": {
+    "n-atlas": "0.1.0"
+  }
+}

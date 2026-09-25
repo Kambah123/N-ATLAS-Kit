@@ -8,6 +8,7 @@ export type GatewayEndpoints = {
   healthUrl: string;
   chatUrl: string;
   transcriptionsUrl: string;
+  speechUrl: string;
   trustedOrigin: string;
 };
 
@@ -36,6 +37,7 @@ export function resolveEndpoints(baseUrl: string): GatewayEndpoints {
     healthUrl: `${origin}/health`,
     chatUrl: `${withVersion}/chat/completions`,
     transcriptionsUrl: `${withVersion}/audio/transcriptions`,
+    speechUrl: `${withVersion}/audio/speech`,
     trustedOrigin: trusted.origin,
   };
 }

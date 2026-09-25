@@ -18,6 +18,9 @@ export function SiteFooter() {
         <a className={linkClass} href={X_HREF} target="_blank" rel="noopener">
           X @0xSkamber
         </a>
+        <a className={linkClass} href="https://natlas-docs.vercel.app/templates">
+          Templates
+        </a>
       </p>
       <details className="mt-1">
         <summary className="w-fit cursor-pointer rounded-md px-1 text-[var(--ink)]">

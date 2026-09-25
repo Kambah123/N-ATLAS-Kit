@@ -21,6 +21,9 @@ container:
   transcribes in a few seconds.
 * The gateway is the ASGI app Modal exposes, with the ASR router mounted
   in-process behind the same Bearer auth.
+* Spoken replies (``POST /v1/audio/speech``) use MMS-TTS, loaded on first use
+  per language. Shipping this route requires a Modal redeploy:
+  ``cd ~/N-ATLAS-Kit && git pull && python3 -m modal deploy serve/modal_app.py``.
 
 One container also means one cold start, one HF cache volume, and one URL.
 
@@ -182,9 +185,13 @@ class NatlasService:
         hf_cache.commit()
 
         transcriber = WhisperTranscriber(settings.asr_models, device=settings.asr_device)
+        # MMS voices load on the first speak request, not during this cold start.
+        from natlas_serve.tts import MmsSpeaker
+
         self.app = gateway.create_app(
             settings,
             asr_router=asr_app.build_router(settings, transcriber),
+            speaker=MmsSpeaker(),
         )
 
     @modal.exit()
@@ -201,7 +208,7 @@ class NatlasService:
 
     @modal.asgi_app()
     def serve(self) -> Any:
-        """The public surface: /v1/chat/completions, /v1/audio/transcriptions, /health."""
+        """Public surface: chat, transcriptions, speech, and /health."""
         return self.app
 
 

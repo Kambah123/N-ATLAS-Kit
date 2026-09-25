@@ -34,6 +34,7 @@ const enSidebar = [
       { text: 'Overview', link: '/' },
       { text: 'Quickstart', link: '/quickstart' },
       { text: 'Examples', link: '/examples' },
+      { text: 'Templates', link: '/templates' },
       { text: 'Self-hosting', link: '/self-hosting' },
       { text: 'Limits and troubleshooting', link: '/troubleshooting' },
     ],
@@ -88,6 +89,7 @@ export default defineConfig({
         nav: [
           { text: 'Bayani', link: '/ha/' },
           { text: 'Farawa', link: '/ha/quickstart' },
+          { text: 'Samfura', link: '/ha/templates' },
           { text: 'English', link: '/' },
         ],
         sidebar: [
@@ -96,6 +98,7 @@ export default defineConfig({
             items: [
               { text: 'Bayani', link: '/ha/' },
               { text: 'Farawa', link: '/ha/quickstart' },
+              { text: 'Samfura', link: '/ha/templates' },
             ],
           },
           {

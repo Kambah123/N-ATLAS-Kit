@@ -12,6 +12,7 @@ export type VisibleMessage = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  language?: ChatLanguage;
 };
 
 type UseChatOptions = {
@@ -72,7 +73,10 @@ export function useChat({ configured, onAction }: UseChatOptions) {
 
       const hint = options?.language ?? language;
       if (options?.language) setLanguage(options.language);
-      const history = [...messages, { id: newId(), role: 'user' as const, content }];
+      const history = [
+        ...messages,
+        { id: newId(), role: 'user' as const, content, language: hint },
+      ];
       const assistantId = newId();
       const body = buildBody(history, true, hint);
       if (options?.fromTranscript) {
@@ -81,7 +85,10 @@ export function useChat({ configured, onAction }: UseChatOptions) {
       } else {
         setNotice(null);
       }
-      setMessages([...history, { id: assistantId, role: 'assistant', content: '' }]);
+      setMessages([
+        ...history,
+        { id: assistantId, role: 'assistant', content: '', language: hint },
+      ]);
       setDraft('');
       setError(null);
       setBusy(true);
