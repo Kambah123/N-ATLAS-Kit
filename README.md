@@ -22,6 +22,29 @@ _Built for the National AI Innovation Challenge 2026 — Problem Statement 1:
 
 </div>
 
+## Demo
+
+Sped-up previews. Each image opens the full recording on the docs site.
+
+<table>
+<tr>
+<td width="50%">
+
+[![Hausa chat in the playground, then Get code copies a working SDK call.](.github/assets/chat-code.gif)](https://natlas-docs.vercel.app/#see-it-in-action)
+
+Hausa chat in the playground, then Get code copies a working SDK call.
+
+</td>
+<td width="50%">
+
+[![Yorùbá chat and the Tune panel, then Speech transcribes audio and translates it.](.github/assets/speech-yoruba.gif)](https://natlas-docs.vercel.app/#see-it-in-action)
+
+Yorùbá chat and the Tune panel, then Speech transcribes audio and translates it.
+
+</td>
+</tr>
+</table>
+
 ## 30-second quickstart
 
 JavaScript (Node 20+):

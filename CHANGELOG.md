@@ -25,7 +25,8 @@ together from this file.
 ### Added
 
 - Playground demo videos on the docs home page (English and Hausa) and the
-  chat recording on both quickstarts.
+  chat recording on both quickstarts. The root README shows GIF previews that
+  link to the full recordings.
 
 ## [0.1.0] - 2026-09-25
 
