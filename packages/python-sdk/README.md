@@ -17,14 +17,6 @@ vendor's model.
 pip install natlas
 ```
 
-That registry install works after the package is published. It is not on PyPI yet.
-
-Not on npm/PyPI yet? Install from GitHub. The repository must be public.
-
-```bash
-pip install "git+https://github.com/Kambah123/N-ATLAS-Kit.git#subdirectory=packages/python-sdk"
-```
-
 Python 3.10+. Sync and async clients both use `httpx`. Responses are Pydantic
 models.
 
@@ -154,7 +146,7 @@ A numeric `Retry-After` on 429 replaces that delay.
 
 ## Runnable examples
 
-From the repo root, after `pip install -e packages/python-sdk`:
+Install the published package (`pip install natlas`), then from the repo root:
 
 ```bash
 python examples/python/chat.py

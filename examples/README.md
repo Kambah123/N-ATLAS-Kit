@@ -10,17 +10,16 @@ they say so and exit.
 | [`support-reply`](./support-reply/)                 | Draft a customer-support reply in the customer's language                                                            |
 | [`js/`](./js/) and [`python/`](./python/)           | One-file chat, stream, and transcribe scripts                                                                        |
 
-The [docs site](../docs/) has the same walkthrough. The
-[playground](../apps/playground/) is the browser app and is built separately.
+The [docs site](https://natlas-docs.vercel.app) has the same walkthrough. The
+[playground](https://natlas-playground.vercel.app) is the live browser app.
 
 ## One-file scripts
 
-Build or install the SDK first. The JavaScript scripts import the built
-package, not the TypeScript source.
+The scripts import the published packages.
 
 ```bash
-pnpm --filter n-atlas build
-pip install -e packages/python-sdk
+npm install n-atlas          # or: pnpm add n-atlas
+pip install natlas
 
 export NATLAS_BASE_URL=http://localhost:8080
 export NATLAS_API_KEY=dev-key   # whatever /serve was started with

@@ -1,10 +1,10 @@
 /**
  * Stream a Hausa reply from a running N-ATLaS gateway.
  *
- *   pnpm --filter n-atlas build
+ *   npm install n-atlas
  *   NATLAS_BASE_URL=http://localhost:8080 NATLAS_API_KEY=... node examples/js/stream.mjs
  */
-import { NAtlas } from '../../packages/js-sdk/dist/index.js';
+import { NAtlas } from 'n-atlas';
 
 const baseURL = process.env.NATLAS_BASE_URL;
 const apiKey = process.env.NATLAS_API_KEY;

@@ -1,0 +1,12 @@
+{
+  "name": "@n-atlas/example-js",
+  "private": true,
+  "type": "module",
+  "description": "One-file chat, stream, and transcribe scripts for the published n-atlas package.",
+  "dependencies": {
+    "n-atlas": "workspace:*"
+  },
+  "scripts": {
+    "test": "node --check chat.mjs && node --check stream.mjs && node --check transcribe.mjs"
+  }
+}

@@ -18,7 +18,7 @@ export const JS_SDK_HREF = 'https://github.com/Kambah123/N-ATLAS-Kit/tree/main/p
 export const PY_SDK_HREF = 'https://github.com/Kambah123/N-ATLAS-Kit/tree/main/packages/python-sdk';
 
 export const SDK_NOTE =
-  'JavaScript uses n-atlas (npm install n-atlas). Python uses natlas (pip install natlas). Not on npm/PyPI yet? Install from GitHub (the repo must be public): pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk" and pip install "git+https://github.com/Kambah123/N-ATLAS-Kit.git#subdirectory=packages/python-sdk". Curl is the raw gateway call. Keep NATLAS_API_KEY on the server.';
+  'JavaScript uses n-atlas (npm install n-atlas, or pnpm add n-atlas). Python uses natlas (pip install natlas). Curl is the raw gateway call. Keep NATLAS_API_KEY on the server.';
 
 const V1_BASH = `# NATLAS_BASE_URL may be the origin or the origin plus /v1.
 base="\${NATLAS_BASE_URL%/}"

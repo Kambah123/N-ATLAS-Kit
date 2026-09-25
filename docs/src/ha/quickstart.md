@@ -41,21 +41,7 @@ Node.js 20 ko sabo. Sunan package shine `n-atlas`.
 
 ```bash
 npm install n-atlas
-```
-
-`n-atlas` ba ya kan npm tukuna. Not on npm/PyPI yet? Install from GitHub. The
-repository must be public.
-
-```bash
-pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk"
-```
-
-A cikin wannan monorepo, gina package na workspace maimakon npm, idan sigar da
-aka buga ta yi baya:
-
-```bash
-pnpm install
-pnpm --filter n-atlas build
+# or: pnpm add n-atlas
 ```
 
 ```js
@@ -89,19 +75,6 @@ Python 3.10 ko sabo. Sunan package shine `natlas`.
 
 ```bash
 pip install natlas
-```
-
-`natlas` ba ya kan PyPI tukuna. Not on npm/PyPI yet? Install from GitHub. The
-repository must be public.
-
-```bash
-pip install "git+https://github.com/Kambah123/N-ATLAS-Kit.git#subdirectory=packages/python-sdk"
-```
-
-Daga wannan repo:
-
-```bash
-pip install -e packages/python-sdk
 ```
 
 ```python

@@ -1,7 +1,7 @@
 /**
  * Transcribe a voice note, then translate it or ask N-ATLaS to reply.
  *
- *   pnpm --filter n-atlas build
+ *   npm install n-atlas
  *   NATLAS_BASE_URL=... NATLAS_API_KEY=... node cli.mjs note.ogg --language ha --to en
  */
 import { isDirectRun, runCli } from './lib.mjs';

@@ -2,7 +2,7 @@
 
 You publish both packages from GitHub. You do not need to run `npm publish` or `twine upload` on your laptop.
 
-The first versions in the repo are **0.1.0**. The npm name is `n-atlas`. The PyPI name is `natlas`.
+`n-atlas@0.1.0` is on npm and `natlas==0.1.0` is on PyPI. Use this page for the next version. The npm name is `n-atlas`. The PyPI name is `natlas`.
 
 Do these steps in order. Finish the npm steps, then the PyPI steps, then press the button.
 
@@ -10,7 +10,7 @@ Do these steps in order. Finish the npm steps, then the PyPI steps, then press t
 
 Merge the pull request that adds `.github/workflows/release.yml`. GitHub only shows the **Release** workflow after that file is on the default branch.
 
-The repository must stay **public**. npm provenance and the GitHub install commands both need a public repo.
+The repository must stay **public**. npm provenance requires a public repository.
 
 ## 2. Create an npm account
 
@@ -40,12 +40,11 @@ If this secret is missing, the JavaScript job still turns green and prints that 
 1. Open <https://pypi.org/account/register/> and create an account.
 2. Turn on two-factor authentication. PyPI Trusted Publishing does not use an API token, so you will not paste a PyPI password into GitHub.
 
-## 6. Add a pending Trusted Publisher
+## 6. Trusted Publisher
 
-Do this **before** the first publish. `natlas` is not on PyPI yet, so this is a **pending** publisher, not a publisher on an existing project.
+`natlas` 0.1.0 is already on PyPI. The pending publisher from that first release is now a Trusted Publisher on the existing project. Do not add another pending publisher for the name `natlas`.
 
-1. Open <https://pypi.org/manage/account/publishing/>.
-2. Under **Add a new pending publisher**, fill in:
+If you ever have to add it again, open the `natlas` project on PyPI, then **Publishing**, and use:
 
 | Field             | Value         |
 | ----------------- | ------------- |
@@ -55,8 +54,6 @@ Do this **before** the first publish. `natlas` is not on PyPI yet, so this is a 
 | Workflow name     | `release.yml` |
 | Environment name  | `pypi`        |
 
-3. Save it.
-
 The workflow file is `.github/workflows/release.yml`. PyPI asks for the file name only: `release.yml`. The environment name must be `pypi`, lowercase, because that is the GitHub environment the Python job uses. Leave the token fields empty. This project does not use a PyPI API token.
 
 ## 7. Run the workflow
@@ -65,7 +62,7 @@ The workflow file is `.github/workflows/release.yml`. PyPI asks for the file nam
 2. Click **Release** in the left sidebar.
 3. Click **Run workflow**.
 4. Branch: `main`.
-5. **Which packages to publish**: `both` the first time. Choose `js` or `python` if you only want one.
+5. **Which packages to publish**: `both`, or `js` / `python` for one package. Bump the version in the four files listed below before you run this again. `0.1.0` is already published, and the registries reject a second upload of the same version.
 6. Click the green **Run workflow** button.
 7. Open the run. **Publish n-atlas (npm)** and **Publish natlas (PyPI)** should both succeed.
 

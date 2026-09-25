@@ -1,6 +1,6 @@
 """Transcribe a file with the NCAIR1 ASR model for one language.
 
-    pip install -e packages/python-sdk
+    pip install natlas
     NATLAS_BASE_URL=... NATLAS_API_KEY=... python examples/python/transcribe.py note.ogg ha
 
 Language defaults to ha. Aliases such as hausa, igbo, yoruba, and english work.

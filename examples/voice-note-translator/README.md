@@ -13,8 +13,8 @@ Nothing is printed unless the gateway returned it. If `NATLAS_BASE_URL` or `NATL
 From the repository root. Node.js 20 or newer.
 
 ```bash
-pnpm install
-pnpm --filter n-atlas build
+npm install n-atlas
+# or: pnpm add n-atlas
 
 export NATLAS_BASE_URL=https://kambah123--natlas-serve-natlasservice-serve.modal.run
 export NATLAS_API_KEY=your-gateway-key

@@ -18,8 +18,8 @@ English is transcribed with the matching NCAIR1 ASR model, then N-ATLaS either
 translates the transcript or replies to it.
 
 ```bash
-pnpm install
-pnpm --filter n-atlas build
+npm install n-atlas
+# or: pnpm add n-atlas
 
 export NATLAS_BASE_URL=https://kambah123--natlas-serve-natlasservice-serve.modal.run
 export NATLAS_API_KEY=your-gateway-key
@@ -49,13 +49,13 @@ the model not to invent order numbers, refunds, or delivery dates. The words
 that come back are still the model's.
 
 ```bash
-pip install -e packages/python-sdk
+pip install natlas
 python examples/support-reply/reply.py --message "My transfer has not arrived" --language en
 ```
 
 ## One-file scripts
 
-After `pnpm --filter n-atlas build` and `pip install -e packages/python-sdk`:
+After `npm install n-atlas` (or `pnpm add n-atlas`) and `pip install natlas`:
 
 ```bash
 node examples/js/chat.mjs
@@ -72,6 +72,6 @@ python examples/python/transcribe.py path/to/note.ogg ha
 ## Playground
 
 [`apps/playground`](https://github.com/Kambah123/N-ATLAS-Kit/tree/main/apps/playground)
-is the browser UI (chat, speech, translate, summarize). It is built separately
-from this docs site. Use the examples above when you want something you can
-run from a terminal in a few minutes.
+is the live browser UI (chat, speech, and get-code) at
+<https://natlas-playground.vercel.app>. Use the examples above when you want
+something you can run from a terminal in a few minutes.

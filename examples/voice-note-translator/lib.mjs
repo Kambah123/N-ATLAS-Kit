@@ -160,7 +160,7 @@ export async function replyToVoiceNote(client, input) {
  * @param {Record<string, string | undefined>} env
  */
 export async function defaultCreateClient(env) {
-  const { NAtlas } = await import('../../packages/js-sdk/dist/index.js');
+  const { NAtlas } = await import('n-atlas');
   return new NAtlas({
     baseURL: env.NATLAS_BASE_URL,
     apiKey: env.NATLAS_API_KEY,

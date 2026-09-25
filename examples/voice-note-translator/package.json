@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "description": "Transcribe a Hausa, Igbo, Yoruba, or Nigerian English voice note and translate or reply with N-ATLaS.",
+  "dependencies": {
+    "n-atlas": "workspace:*"
+  },
   "scripts": {
     "start": "node server.mjs",
     "cli": "node cli.mjs",

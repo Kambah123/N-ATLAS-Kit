@@ -3,10 +3,11 @@
 Developer toolkit for **N-ATLaS**, Nigeria's sovereign multilingual model, and
 the four NCAIR1 speech models that sit beside it.
 
-N-ATLaS speaks **Hausa, Igbo, Yorùbá, and Nigerian English**. The speech models
-are separate Whisper Small checkpoints, one per language, trained on voice
-recorded across Nigeria's six geopolitical zones. This repository is the
-client and the self-hosting kit. It does not ship weights.
+N-ATLaS speaks **Hausa, Igbo, Yorùbá, and Nigerian English**. The playground
+also offers Nigerian Pidgin (beta). The speech models are separate Whisper
+Small checkpoints, one per language, trained on voice recorded across Nigeria's
+six geopolitical zones. This repository is the client and the self-hosting kit.
+It does not ship weights.
 
 A Hausa draft of this page is at [Bayani](/ha/). It has not been reviewed by a
 native speaker.
@@ -20,13 +21,13 @@ accepts 30 seconds of 16 kHz mono audio.
 
 N-ATLAS Kit is the layer in front of that:
 
-| Piece                                                                              | What it is                                                               |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| [`serve/`](https://github.com/Kambah123/N-ATLAS-Kit/tree/main/serve)               | One OpenAI-compatible gateway for chat and all four speech models        |
-| [`n-atlas`](https://github.com/Kambah123/N-ATLAS-Kit/tree/main/packages/js-sdk)    | JavaScript / TypeScript SDK                                              |
-| [`natlas`](https://github.com/Kambah123/N-ATLAS-Kit/tree/main/packages/python-sdk) | Python SDK, sync and async                                               |
-| [Examples](/examples)                                                              | Small apps you can run against a gateway                                 |
-| [Playground](https://github.com/Kambah123/N-ATLAS-Kit/tree/main/apps/playground)   | Browser app. A separate track is building it; this site only links to it |
+| Piece                                                                | What it is                                                               |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| [`serve/`](https://github.com/Kambah123/N-ATLAS-Kit/tree/main/serve) | One OpenAI-compatible gateway for chat and all four speech models        |
+| [`n-atlas`](https://www.npmjs.com/package/n-atlas)                   | JavaScript / TypeScript SDK. `npm install n-atlas` or `pnpm add n-atlas` |
+| [`natlas`](https://pypi.org/project/natlas/)                         | Python SDK, sync and async. `pip install natlas`                         |
+| [Examples](/examples)                                                | Small apps you can run against a gateway                                 |
+| [Playground](https://natlas-playground.vercel.app)                   | Live browser app: chat, speech, and get-code                             |
 
 There is no public NCAIR inference API in this release. Every client takes a
 `baseURL`. The hosted gateway used for the National AI Innovation Challenge
