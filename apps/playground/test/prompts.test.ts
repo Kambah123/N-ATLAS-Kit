@@ -4,6 +4,7 @@ import {
   TRANSLATE_TARGETS,
   buildChatTurn,
   defaultTranslateTarget,
+  replyMaxTokens,
   requestedLanguage,
   systemPrompt,
   translatePrompt,
@@ -40,6 +41,35 @@ describe('buildChatTurn', () => {
     const system = turn.messages[0]?.content ?? '';
     expect(system).toContain('reply in Hausa');
     expect(system).toContain("The user's explicit language request always wins");
+  });
+});
+
+describe('spoken replies and Pidgin turns', () => {
+  it('pins Nigerian Pidgin to the latest user turn, not an earlier Igbo reply', () => {
+    const turn = buildChatTurn('pcm', [
+      { role: 'user', content: 'Kedu' },
+      { role: 'assistant', content: 'Adị m mma' },
+      { role: 'user', content: 'How far' },
+    ]);
+    expect(turn.language).toBe('pcm');
+    expect(turn.messages[1]?.content).toBe('Kedu');
+    const latest = turn.messages[turn.messages.length - 1]?.content ?? '';
+    expect(latest.startsWith('How far')).toBe(true);
+    expect(latest).toContain('Reply in Nigerian Pidgin only');
+    expect(latest).toContain('Abeg, how you dey? I dey fine.');
+    expect(latest).toContain('Not Igbo');
+  });
+
+  it('asks for a short plain reply when the turn will be spoken', () => {
+    const turn = buildChatTurn('yo', [{ role: 'user', content: 'Bawo' }], { spoken: true });
+    const latest = turn.messages[turn.messages.length - 1]?.content ?? '';
+    const system = turn.messages[0]?.content ?? '';
+    expect(latest).toContain('2 or 3 short plain sentences');
+    expect(latest).toContain('No lists, no markdown');
+    expect(system).toContain('2 or 3 short plain sentences');
+    expect(replyMaxTokens(512, true)).toBe(128);
+    expect(replyMaxTokens(64, true)).toBe(64);
+    expect(replyMaxTokens(512, false)).toBe(512);
   });
 });
 

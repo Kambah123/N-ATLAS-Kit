@@ -5,6 +5,7 @@ import { NOT_CONFIGURED_MESSAGE } from '@/lib/languages';
 import { RATE_LIMITS } from '@/lib/limits';
 import { rateLimit } from '@/lib/rate-limit';
 import { isChatLanguage, isRecord } from '@/lib/types';
+import { spokenUnavailable } from '@/lib/voice';
 import { UpstreamError, fetchUpstream, upstreamErrorResponse } from '@/lib/upstream';
 
 export const dynamic = 'force-dynamic';
@@ -76,14 +77,10 @@ export async function POST(request: Request): Promise<Response> {
       return new Response(bytes, { status: 200, headers });
     }
 
-    if (response.status === 404 || response.status === 501) {
-      return errorJson(
-        501,
-        'speech_unavailable',
-        'The gateway has no speech voice yet. Redeploy Modal to enable Hausa, Igbo, Yorùbá, and English voices.',
-      );
+    if (response.status === 400) {
+      return await upstreamErrorResponse(response, config.apiKey);
     }
-    return await upstreamErrorResponse(response, config.apiKey);
+    return errorJson(502, 'speech_unavailable', spokenUnavailable(body.language));
   } catch (error) {
     if (error instanceof UpstreamError) {
       return errorJson(error.status, error.code, error.message);

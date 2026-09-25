@@ -7,11 +7,15 @@ from fastapi.testclient import TestClient
 
 from natlas_serve.gateway import create_app
 from natlas_serve.tts import (
+    IGBO_MODEL_ID,
+    MMS_MODEL_IDS,
     SpeechClip,
     SpeechError,
+    normalize_loudness,
     pcm_to_wav,
     prepare_speech_text,
     voice_for,
+    voice_source,
 )
 
 AUTH = {"Authorization": "Bearer test-key"}
@@ -30,6 +34,30 @@ def test_pcm_to_wav_is_a_mono_riff() -> None:
     wav = pcm_to_wav(np.array([0.0, 0.5, -0.5], dtype=np.float32), 16_000)
     assert wav.startswith(b"RIFF")
     assert b"WAVE" in wav[:16]
+
+
+def test_igbo_voice_is_the_replacement_checkpoint() -> None:
+    assert MMS_MODEL_IDS["ig"] == IGBO_MODEL_ID
+    assert IGBO_MODEL_ID == "Shinzmann/soro-tts-ibo"
+    assert "facebook/mms-tts-ibo" not in MMS_MODEL_IDS.values()
+    assert voice_source("ig") == IGBO_MODEL_ID
+
+
+def test_prepare_speech_text_strips_markdown() -> None:
+    spoken = prepare_speech_text("**Rice** is ready.\n1. Wash it\n- Cook it")
+    assert "**" not in spoken
+    assert "1." not in spoken
+    assert spoken == "Rice is ready. Wash it Cook it"
+
+
+def test_loudness_normalization_matches_a_quiet_clip_to_a_loud_one() -> None:
+    quiet = normalize_loudness(np.full(1600, 0.02, dtype=np.float32))
+    loud = normalize_loudness(np.full(1600, 0.5, dtype=np.float32))
+    quiet_rms = float(np.sqrt(np.mean(np.square(quiet))))
+    loud_rms = float(np.sqrt(np.mean(np.square(loud))))
+    assert abs(quiet_rms - loud_rms) / loud_rms < 0.05
+    wav = pcm_to_wav(np.full(800, 0.01, dtype=np.float32), 16_000)
+    assert wav.startswith(b"RIFF")
 
 
 def test_pidgin_uses_the_english_voice_and_says_so() -> None:

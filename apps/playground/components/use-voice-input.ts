@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { errorMessage } from '@/lib/sse';
 import { type ChatLanguage } from '@/lib/types';
-import { VOICE_CHAT_SECONDS, asrLanguageForChat, micErrorMessage } from '@/lib/voice';
+import {
+  VOICE_CHAT_SECONDS,
+  asrLanguageForChat,
+  capitalizeTranscript,
+  micErrorMessage,
+} from '@/lib/voice';
 
 function pickMime(): string {
   if (typeof MediaRecorder === 'undefined') return '';
@@ -28,7 +33,11 @@ export function useVoiceInput({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<number | null>(null);
   const languageRef = useRef(language);
+  const onTranscriptRef = useRef(onTranscript);
+  const onErrorRef = useRef(onError);
   languageRef.current = language;
+  onTranscriptRef.current = onTranscript;
+  onErrorRef.current = onError;
 
   useEffect(() => {
     return () => {
@@ -56,9 +65,11 @@ export function useVoiceInput({
           ? payload.text.trim()
           : '';
       if (!text) throw new Error('The recording had no words to send.');
-      onTranscript(text);
+      onTranscriptRef.current(capitalizeTranscript(text));
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'Could not transcribe that recording.');
+      onErrorRef.current(
+        error instanceof Error ? error.message : 'Could not transcribe that recording.',
+      );
     } finally {
       setTranscribing(false);
     }

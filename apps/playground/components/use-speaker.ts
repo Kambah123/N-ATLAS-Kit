@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { type ChatLanguage } from '@/lib/types';
-import { browserSpeechLang, missingVoiceNote, pidginVoiceNote } from '@/lib/voice';
+import {
+  browserSpeechLang,
+  gatePidginNote,
+  isPidginVoiceNote,
+  missingVoiceNote,
+  pidginVoiceNote,
+  plainSpeechText,
+} from '@/lib/voice';
 
 export type Speakable = {
   id: string;
@@ -10,13 +17,41 @@ export type Speakable = {
   language?: ChatLanguage;
 };
 
+export type SpeakerPhase = 'idle' | 'preparing' | 'speaking';
+
 type BrowserResult = { ok: true; note: string | null } | { ok: false; note: string };
+
+const PIDGIN_NOTE_KEY = 'natlas-pidgin-voice-note';
 
 export function useSpeaker() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const urlRef = useRef<string | null>(null);
-  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const pidginShownRef = useRef(false);
+  const [phase, setPhase] = useState<SpeakerPhase>('idle');
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
+
+  const revealNote = useCallback((next: string | null) => {
+    let shown = pidginShownRef.current;
+    if (!shown && typeof window !== 'undefined') {
+      try {
+        shown = sessionStorage.getItem(PIDGIN_NOTE_KEY) === '1';
+      } catch {
+        shown = false;
+      }
+    }
+    const gated = gatePidginNote(next, shown);
+    pidginShownRef.current = gated.shown;
+    if (gated.shown && gated.note && isPidginVoiceNote(gated.note)) {
+      try {
+        sessionStorage.setItem(PIDGIN_NOTE_KEY, '1');
+      } catch {
+        /* The note still shows this once. */
+      }
+    }
+    setNote(gated.note);
+  }, []);
 
   const releaseAudio = useCallback(() => {
     audioRef.current?.pause();
@@ -31,8 +66,11 @@ export function useSpeaker() {
   }, []);
 
   const stop = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
     releaseAudio();
-    setSpeakingId(null);
+    setPhase('idle');
+    setActiveId(null);
   }, [releaseAudio]);
 
   useEffect(() => () => releaseAudio(), [releaseAudio]);
@@ -59,36 +97,51 @@ export function useSpeaker() {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = voice?.lang ?? wanted;
       if (voice) utterance.voice = voice;
-      utterance.onend = () => setSpeakingId((current) => (current === id ? null : current));
+      utterance.onstart = () => {
+        setPhase('speaking');
+        setActiveId(id);
+      };
+      utterance.onend = () => {
+        setPhase('idle');
+        setActiveId((current) => (current === id ? null : current));
+      };
       utterance.onerror = () => {
-        setSpeakingId((current) => (current === id ? null : current));
-        setNote(missingVoiceNote(language));
+        setPhase('idle');
+        setActiveId((current) => (current === id ? null : current));
+        revealNote(missingVoiceNote(language));
       };
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
       return { ok: true, note: language === 'pcm' ? pidginVoiceNote() : null };
     },
-    [],
+    [revealNote],
   );
 
   const speak = useCallback(
     async (message: Speakable) => {
       const language = message.language ?? 'en';
-      const text = message.content.trim().slice(0, 600);
+      const text = plainSpeechText(message.content).slice(0, 600);
       if (!text) return;
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
       releaseAudio();
       setNote(null);
-      setSpeakingId(message.id);
+      setPhase('preparing');
+      setActiveId(message.id);
       try {
         const response = await fetch('/api/speech', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, language }),
+          signal: controller.signal,
         });
+        if (controller.signal.aborted) return;
         const type = response.headers.get('content-type') ?? '';
         if (response.ok && type.includes('audio')) {
           const voiceNote = response.headers.get('x-natlas-voice-note');
           const blob = await response.blob();
+          if (controller.signal.aborted) return;
           const url = URL.createObjectURL(blob);
           urlRef.current = url;
           const audio = new Audio(url);
@@ -98,37 +151,49 @@ export function useSpeaker() {
               URL.revokeObjectURL(url);
               urlRef.current = null;
             }
-            setSpeakingId((current) => (current === message.id ? null : current));
+            setPhase('idle');
+            setActiveId((current) => (current === message.id ? null : current));
           };
-          if (voiceNote) setNote(voiceNote);
+          if (voiceNote) revealNote(voiceNote);
           try {
             await audio.play();
           } catch {
             releaseAudio();
-            setSpeakingId(null);
+            setPhase('idle');
+            setActiveId(null);
             setNote('Tap play on the reply to hear it. The browser blocked automatic playback.');
+            return;
           }
+          if (controller.signal.aborted || audio.ended) {
+            setPhase('idle');
+            setActiveId(null);
+            return;
+          }
+          setPhase('speaking');
           return;
         }
         const browser = speakWithBrowser(text, language, message.id);
         if (browser.ok) {
-          setNote(browser.note ?? (language === 'pcm' ? pidginVoiceNote() : null));
+          revealNote(browser.note ?? (language === 'pcm' ? pidginVoiceNote() : null));
           return;
         }
-        setSpeakingId(null);
-        setNote(browser.note);
-      } catch {
+        setPhase('idle');
+        setActiveId(null);
+        revealNote(browser.note);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
         const browser = speakWithBrowser(text, language, message.id);
         if (browser.ok) {
-          setNote(browser.note);
+          revealNote(browser.note);
           return;
         }
-        setSpeakingId(null);
-        setNote(browser.note);
+        setPhase('idle');
+        setActiveId(null);
+        revealNote(browser.note);
       }
     },
-    [releaseAudio, speakWithBrowser],
+    [releaseAudio, revealNote, speakWithBrowser],
   );
 
-  return { speakingId, note, speak, stop };
+  return { phase, activeId, note, speak, stop };
 }

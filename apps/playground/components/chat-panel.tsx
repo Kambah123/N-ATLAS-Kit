@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { TuneFields } from '@/components/chat-settings';
 import { IconMic, IconPaperclip } from '@/components/icons';
-import { useSpeaker } from '@/components/use-speaker';
+import { MarkdownText } from '@/components/markdown-text';
+import { type SpeakerPhase, useSpeaker } from '@/components/use-speaker';
 import { useVoiceInput } from '@/components/use-voice-input';
 import { WakingCard } from '@/components/waking-card';
 import { type ChatController } from '@/components/use-chat';
@@ -31,7 +32,7 @@ export function ChatPanel({
     disabled: !configured || chat.busy,
     onTranscript: (text) => {
       setVoiceError(null);
-      void chat.send(text, { fromTranscript: true });
+      void chat.send(text, { fromTranscript: true, spoken: true });
     },
     onError: setVoiceError,
   });
@@ -59,7 +60,7 @@ export function ChatPanel({
   }, [autoSpeak, chat.busy, chat.messages, speaker]);
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col" aria-label="Chat">
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col" aria-label="Chat">
       {chat.messages.length > 0 ? (
         <div className="flex shrink-0 justify-end px-4 pt-3">
           <button
@@ -72,7 +73,7 @@ export function ChatPanel({
         </div>
       ) : null}
       <div
-        className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4"
+        className="min-h-0 min-w-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain px-4 py-4"
         aria-live="polite"
       >
         {chat.messages.length === 0 ? (
@@ -97,18 +98,22 @@ export function ChatPanel({
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[40rem] rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap ${
+                className={`max-w-[40rem] rounded-2xl px-4 py-3 text-sm leading-6 ${
+                  message.role === 'user' ? 'whitespace-pre-wrap' : ''
+                } ${
                   message.role === 'user'
                     ? 'bg-[var(--user)] text-[var(--user-ink)]'
                     : 'border border-[var(--line)] bg-[var(--bg-sunken)] text-[var(--ink)]'
                 }`}
               >
-                {message.role === 'assistant' && message.content.length === 0 ? (
+                {message.role === 'assistant' && message.content.length === 0 && chat.busy ? (
                   chat.slow ? (
                     <WakingCard />
                   ) : (
                     <span className="text-[var(--muted)]">Thinking…</span>
                   )
+                ) : message.role === 'assistant' ? (
+                  <MarkdownText text={message.content} />
                 ) : (
                   message.content
                 )}
@@ -119,12 +124,19 @@ export function ChatPanel({
                   <button
                     type="button"
                     onClick={() => {
-                      if (speaker.speakingId === message.id) speaker.stop();
-                      else void speaker.speak(message);
+                      if (speaker.phase === 'speaking' && speaker.activeId === message.id) {
+                        speaker.stop();
+                      } else if (!(
+                        speaker.phase === 'preparing' && speaker.activeId === message.id
+                      )) {
+                        void speaker.speak(message);
+                      }
                     }}
                     className="mt-2 rounded-lg border border-[var(--line)] px-2 py-1 text-xs font-medium text-[var(--ink)]"
                   >
-                    {speaker.speakingId === message.id ? 'Stop' : 'Play'}
+                    {speaker.phase === 'speaking' && speaker.activeId === message.id
+                      ? 'Stop'
+                      : 'Play'}
                   </button>
                 ) : null}
               </div>
@@ -135,10 +147,10 @@ export function ChatPanel({
       </div>
 
       <form
-        className="shrink-0 border-t border-[var(--line)] px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4"
+        className="min-w-0 shrink-0 border-t border-[var(--line)] px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4"
         onSubmit={(event) => {
           event.preventDefault();
-          void chat.send(chat.draft);
+          void chat.send(chat.draft, { spoken: autoSpeak });
         }}
       >
         {chat.error ? (
@@ -168,17 +180,20 @@ export function ChatPanel({
             {voiceError}
           </p>
         ) : null}
-        {voice.transcribing ? (
-          <p className="mb-2 text-xs text-[var(--muted)]" role="status">
-            Transcribing…
-          </p>
-        ) : null}
+        <VoiceStatus
+          recording={voice.recording}
+          elapsed={voice.elapsed}
+          transcribing={voice.transcribing}
+          thinking={chat.busy}
+          phase={speaker.phase}
+          onStop={speaker.stop}
+        />
         {speaker.note ? (
           <p className="mb-2 text-xs text-[var(--muted)]" role="status">
             {speaker.note}
           </p>
         ) : null}
-        <div className="mb-2 flex gap-2 max-[768px]:flex-nowrap max-[768px]:overflow-x-auto max-[768px]:pb-1 min-[769px]:flex-wrap">
+        <div className="mb-2 flex min-w-0 max-w-full gap-2 overflow-x-auto [scrollbar-width:none] max-[768px]:flex-nowrap min-[769px]:flex-wrap [&::-webkit-scrollbar]:hidden">
           {option.examples.map((example) => (
             <button
               key={example}
@@ -201,7 +216,7 @@ export function ChatPanel({
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
-                void chat.send(chat.draft);
+                void chat.send(chat.draft, { spoken: autoSpeak });
               }
             }}
             rows={2}
@@ -298,5 +313,47 @@ export function ChatPanel({
         </div>
       </form>
     </section>
+  );
+}
+
+function VoiceStatus({
+  recording,
+  elapsed,
+  transcribing,
+  thinking,
+  phase,
+  onStop,
+}: {
+  recording: boolean;
+  elapsed: number;
+  transcribing: boolean;
+  thinking: boolean;
+  phase: SpeakerPhase;
+  onStop: () => void;
+}) {
+  const clock = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
+  let label: string | null = null;
+  if (recording) label = `Listening ${clock}`;
+  else if (transcribing) label = 'Transcribing';
+  else if (phase === 'preparing') label = 'Preparing voice';
+  else if (phase === 'speaking') label = 'Speaking';
+  else if (thinking) label = 'Thinking';
+  if (!label) return null;
+  return (
+    <p className="mb-2 flex items-center gap-2 text-xs font-medium text-[var(--ink)]" role="status">
+      {recording || phase === 'preparing' || phase === 'speaking' ? (
+        <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-[var(--accent)]" />
+      ) : null}
+      {label}
+      {phase === 'speaking' ? (
+        <button
+          type="button"
+          onClick={onStop}
+          className="rounded-lg border border-[var(--line)] px-2 py-0.5 text-xs font-medium"
+        >
+          Stop
+        </button>
+      ) : null}
+    </p>
   );
 }
