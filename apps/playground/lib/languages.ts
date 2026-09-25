@@ -1,3 +1,4 @@
+import { systemPrompt } from '@/lib/prompts';
 import { type AsrLanguage, type ChatLanguage } from '@/lib/types';
 
 export type ChatLanguageOption = {
@@ -22,8 +23,7 @@ export const CHAT_LANGUAGE_OPTIONS: readonly ChatLanguageOption[] = [
     label: 'English',
     endonym: 'English',
     blurb: 'Nigerian and international English.',
-    system:
-      'You are N-ATLaS, a multilingual assistant built for Nigeria. Reply in clear English unless the user asks for another language.',
+    system: systemPrompt('en', false),
     placeholder: 'Ask N-ATLaS something…',
     examples: [
       'Explain how to cook jollof rice, step by step.',
@@ -36,8 +36,7 @@ export const CHAT_LANGUAGE_OPTIONS: readonly ChatLanguageOption[] = [
     label: 'Hausa',
     endonym: 'Hausa',
     blurb: 'The model replies in Hausa.',
-    system:
-      'Kai N-ATLaS ne, mataimaki mai harsuna da yawa na Najeriya. Amsa da Hausa sai dai idan mai amfani ya nemi wani harshe.',
+    system: systemPrompt('ha', false),
     placeholder: 'Tambayi N-ATLaS…',
     examples: [
       'Sannu! Ka gaya mini yadda ake dafa jollof rice.',
@@ -50,8 +49,7 @@ export const CHAT_LANGUAGE_OPTIONS: readonly ChatLanguageOption[] = [
     label: 'Igbo',
     endonym: 'Igbo',
     blurb: 'The model replies in Igbo.',
-    system:
-      'Ị bụ N-ATLaS, onye enyemaka nke na-asụ ọtụtụ asụsụ na Naịjirịa. Zaa n’Igbo ma ọ bụrụ na onye ọrụ ahụghị asụsụ ọzọ.',
+    system: systemPrompt('ig', false),
     placeholder: 'Jụọ N-ATLaS…',
     examples: [
       'Kedu ka e si esi jollof rice?',
@@ -64,8 +62,7 @@ export const CHAT_LANGUAGE_OPTIONS: readonly ChatLanguageOption[] = [
     label: 'Yorùbá',
     endonym: 'Yorùbá',
     blurb: 'The model replies in Yorùbá.',
-    system:
-      'Ìwọ ni N-ATLaS, olùrànlọ́wọ́ onírúurú èdè fún Nàìjíríà. Dáhùn ní Yorùbá àyàfi tí olùbéèrè bá béèrè èdè mìíràn.',
+    system: systemPrompt('yo', false),
     placeholder: 'Béèrè lọ́wọ́ N-ATLaS…',
     examples: [
       'Báwo ni a ṣe ń se jollof rice?',
@@ -75,11 +72,10 @@ export const CHAT_LANGUAGE_OPTIONS: readonly ChatLanguageOption[] = [
   },
   {
     id: 'pcm',
-    label: 'Pidgin',
+    label: 'Pidgin (beta)',
     endonym: 'Naija',
-    blurb: 'Nigerian Pidgin. Speech uses the Nigerian English model.',
-    system:
-      'You be N-ATLaS, multilingual assistant for Nigeria. Answer for Nigerian Pidgin unless the person ask for another language.',
+    blurb: 'Nigerian Pidgin is beta. Speech uses the Nigerian English model.',
+    system: systemPrompt('pcm', false),
     placeholder: 'Ask N-ATLaS for Pidgin…',
     examples: [
       'Abeg explain how person go cook jollof rice.',
@@ -110,9 +106,6 @@ export function chatLanguageOption(id: ChatLanguage): ChatLanguageOption {
   if (!fallback) throw new Error('No chat languages are configured.');
   return fallback;
 }
-
-export const TRANSLATE_SYSTEM =
-  'You translate text into clear English. The source may be Hausa, Igbo, Yorùbá, Nigerian Pidgin, or Nigerian English. Return only the translation, with no preamble.';
 
 export const ATTRIBUTION =
   'N-ATLaS is an initiative of the Federal Ministry of Communications, Innovation and Digital Economy, and powered by Awarri Technologies.';

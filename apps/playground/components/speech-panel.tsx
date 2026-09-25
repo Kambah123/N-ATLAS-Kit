@@ -4,14 +4,25 @@ import { useEffect, useRef, useState } from 'react';
 import { type LastAction } from '@/components/types';
 import { WakingCard } from '@/components/waking-card';
 import { useSlow } from '@/components/use-slow';
-import { ASR_LANGUAGE_OPTIONS, PRIVACY_NOTE, TRANSLATE_SYSTEM } from '@/lib/languages';
+import { ASR_LANGUAGE_OPTIONS, PRIVACY_NOTE } from '@/lib/languages';
+import {
+  defaultTranslateTarget,
+  PROMPT_LANGUAGE_NAME,
+  translatePrompt,
+  TRANSLATE_TARGETS,
+} from '@/lib/prompts';
 import { MAX_AUDIO_BYTES, MAX_AUDIO_SECONDS } from '@/lib/limits';
 import { errorMessage, messageFromCompletion } from '@/lib/sse';
-import { LLM_MODEL_ID, type AsrLanguage, type ChatRequestBody } from '@/lib/types';
+import {
+  LLM_MODEL_ID,
+  type AsrLanguage,
+  type ChatLanguage,
+  type ChatRequestBody,
+} from '@/lib/types';
 
 type SpeechPanelProps = {
   configured: boolean;
-  onReply: (transcript: string) => void;
+  onReply: (transcript: string, audioLanguage: AsrLanguage) => void;
   onAction: (action: LastAction) => void;
   onBusy: (busy: boolean) => void;
   replyDisabled: boolean;
@@ -27,6 +38,11 @@ export function SpeechPanel({
   uploadRequest = 0,
 }: SpeechPanelProps) {
   const [language, setLanguage] = useState<AsrLanguage>('ha');
+  const [translateTarget, setTranslateTarget] = useState<ChatLanguage>(
+    defaultTranslateTarget('ha'),
+  );
+  const [translateTargetTouched, setTranslateTargetTouched] = useState(false);
+  const [translationLanguage, setTranslationLanguage] = useState<ChatLanguage>('en');
   const [busy, setBusy] = useState(false);
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -148,20 +164,28 @@ export function SpeechPanel({
     }
   }
 
+  function selectAudioLanguage(next: AsrLanguage) {
+    setLanguage(next);
+    if (!translateTargetTouched) setTranslateTarget(defaultTranslateTarget(next));
+  }
+
   async function translate() {
     if (!transcript.trim() || translating) return;
+    const target = translateTarget;
+    const instruction = translatePrompt(target);
     const body: ChatRequestBody = {
       model: LLM_MODEL_ID,
       messages: [
-        { role: 'system', content: TRANSLATE_SYSTEM },
+        { role: 'system', content: instruction },
         { role: 'user', content: transcript },
       ],
       temperature: 0.2,
       max_tokens: 512,
       stream: false,
-      language: 'en',
+      language: target,
     };
-    onAction({ title: 'Translate to English', request: { kind: 'chat', body } });
+    const targetName = PROMPT_LANGUAGE_NAME[target];
+    onAction({ title: `Translate to ${targetName}`, request: { kind: 'chat', body } });
     setTranslating(true);
     setError(null);
     try {
@@ -174,6 +198,7 @@ export function SpeechPanel({
       if (!response.ok) throw new Error(errorMessage(payload, 'Translation failed.'));
       const text = messageFromCompletion(payload);
       if (!text.trim()) throw new Error('N-ATLaS returned an empty translation.');
+      setTranslationLanguage(target);
       setTranslation(text.trim());
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Translation failed.');
@@ -209,7 +234,7 @@ export function SpeechPanel({
                   type="button"
                   role="radio"
                   aria-checked={active}
-                  onClick={() => setLanguage(option.id)}
+                  onClick={() => selectAudioLanguage(option.id)}
                   className={`rounded-full px-3 py-1.5 text-sm ${
                     active
                       ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
@@ -327,18 +352,42 @@ export function SpeechPanel({
               <button
                 type="button"
                 disabled={replyDisabled || busy}
-                onClick={() => onReply(transcript)}
+                onClick={() => onReply(transcript, language)}
                 className="rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-ink)] disabled:opacity-50"
               >
                 Reply to this
               </button>
+              <label className="sr-only" htmlFor="translate-target">
+                Translate into
+              </label>
+              <select
+                id="translate-target"
+                value={translateTarget}
+                disabled={translating || busy}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  const next = TRANSLATE_TARGETS.find((option) => option.id === value);
+                  if (!next) return;
+                  setTranslateTargetTouched(true);
+                  setTranslateTarget(next.id);
+                }}
+                className="rounded-xl border border-[var(--line)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--ink)]"
+              >
+                {TRANSLATE_TARGETS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
                 disabled={translating || busy}
                 onClick={() => void translate()}
                 className="rounded-xl border border-[var(--gold-line)] px-4 py-2 text-sm font-medium text-[var(--gold)] disabled:opacity-50"
               >
-                {translating ? 'Translating…' : 'Translate to English'}
+                {translating
+                  ? 'Translating…'
+                  : `Translate to ${PROMPT_LANGUAGE_NAME[translateTarget]}`}
               </button>
               <button
                 type="button"
@@ -351,7 +400,7 @@ export function SpeechPanel({
             {translation ? (
               <div className="mt-4 border-t border-[var(--line)] pt-4">
                 <p className="text-xs font-medium tracking-wide text-[var(--muted)] uppercase">
-                  English
+                  {PROMPT_LANGUAGE_NAME[translationLanguage]}
                 </p>
                 <p className="mt-2 text-sm leading-6 whitespace-pre-wrap">{translation}</p>
               </div>
