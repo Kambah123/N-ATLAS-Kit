@@ -1,0 +1,91 @@
+# ---------- Secrets ----------
+# Never commit real credentials. Only .env.example is tracked.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.hf_token
+.modal.toml
+.vercel
+
+# ---------- Node / pnpm ----------
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-error.log*
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ---------- Next.js ----------
+.next/
+next-env.d.ts
+
+# ---------- Test / coverage ----------
+coverage/
+.nyc_output/
+junit.xml
+.vitest/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# ---------- Models / weights / large artefacts ----------
+# N-ATLaS weights are NOT Apache-2.0 and must never be vendored into this repo.
+# See NOTICE and docs/licensing.md.
+*.safetensors
+*.bin
+*.gguf
+*.pt
+*.pth
+*.onnx
+models/
+.hf-cache/
+huggingface/
+
+# ---------- Media scratch ----------
+tmp/
+.tmp/
+scratch/
+*.wav
+*.mp3
+*.m4a
+*.ogg
+*.opus
+*.webm
+!examples/**/fixtures/*.ogg
+!packages/*/tests/fixtures/*
+!packages/*/test/fixtures/*
+
+# ---------- Editors / OS ----------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+
+# ---------- Docs site build ----------
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+.docusaurus/

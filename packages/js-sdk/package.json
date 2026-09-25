@@ -1,0 +1,70 @@
+{
+  "name": "n-atlas",
+  "version": "0.0.0",
+  "description": "Official-style developer SDK for N-ATLaS, Nigeria's sovereign multilingual LLM (Hausa, Igbo, Yoruba, Nigerian English) and its ASR models.",
+  "keywords": [
+    "n-atlas",
+    "natlas",
+    "nigeria",
+    "hausa",
+    "igbo",
+    "yoruba",
+    "llm",
+    "asr",
+    "speech-to-text",
+    "african-languages"
+  ],
+  "license": "Apache-2.0",
+  "author": "OneDev Studioo",
+  "homepage": "https://github.com/Kambah123/N-ATLAS-Kit/tree/main/packages/js-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kambah123/N-ATLAS-Kit.git",
+    "directory": "packages/js-sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/Kambah123/N-ATLAS-Kit/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf dist coverage .turbo"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@vitest/coverage-v8": "^2.1.8",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

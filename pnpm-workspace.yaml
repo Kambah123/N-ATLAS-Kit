@@ -1,0 +1,5 @@
+packages:
+  - "packages/js-sdk"
+  - "apps/*"
+  - "docs"
+  - "examples/*"

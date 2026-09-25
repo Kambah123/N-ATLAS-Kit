@@ -1,0 +1,45 @@
+# Ruff config for Python that lives OUTSIDE packages/python-sdk - currently
+# `serve/`. The SDK has its own, stricter config in
+# packages/python-sdk/pyproject.toml, which takes precedence there because ruff
+# uses the nearest config file.
+
+line-length = 100
+target-version = "py310"   # serve/ supports Python 3.10+, same as the SDK
+
+exclude = [
+    ".venv",
+    "node_modules",
+    "packages/python-sdk", # has its own config
+]
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
+]
+ignore = [
+    # `serve/` is operational code. Printing a readable report to the operator
+    # is the entire point of the pre-flight script.
+    "T201",
+]
+
+[lint.per-file-ignores]
+# Modal apps import heavy libraries inside the remote function body on purpose:
+# those packages exist in the container image, not on the machine running the
+# CLI. That is the documented Modal pattern, not a lint violation.
+"serve/**" = ["PLC0415"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+
+[lint.isort]
+known-first-party = ["natlas_serve"]
