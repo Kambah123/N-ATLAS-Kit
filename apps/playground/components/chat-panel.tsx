@@ -109,13 +109,18 @@ export function ChatPanel({
             <code>NATLAS_API_KEY</code> on the server, then reload.
           </p>
         ) : null}
-        <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+        {chat.notice ? (
+          <p className="mb-2 text-xs text-[var(--muted)]" role="status">
+            {chat.notice}
+          </p>
+        ) : null}
+        <div className="mb-2 flex flex-wrap gap-2">
           {option.examples.map((example) => (
             <button
               key={example}
               type="button"
               onClick={() => chat.setDraft(example)}
-              className="shrink-0 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 py-1.5 text-left text-xs text-[var(--ink)] hover:border-[var(--gold-line)]"
+              className="max-w-full rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 py-1.5 text-left text-xs leading-5 whitespace-normal text-[var(--ink)] hover:border-[var(--gold-line)]"
             >
               {example}
             </button>

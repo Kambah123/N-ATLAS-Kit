@@ -24,7 +24,7 @@ export function LanguageField({ language, onLanguage }: LanguageFieldProps) {
           const value = event.target.value;
           if (isChatLanguage(value)) onLanguage(value);
         }}
-        className="header-control max-w-[9.5rem] rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-[var(--header-ink)]"
+        className="header-control max-w-[11rem] rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-[var(--header-ink)]"
       >
         {CHAT_LANGUAGE_OPTIONS.map((option) => (
           <option key={option.id} value={option.id}>

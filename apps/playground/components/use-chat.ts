@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { chatLanguageOption } from '@/lib/languages';
 import { DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE, MAX_MESSAGE_CHARS } from '@/lib/limits';
+import { buildChatTurn, PROMPT_LANGUAGE_NAME } from '@/lib/prompts';
 import { deltaFromEvent, errorMessage, messageFromCompletion, takeSseData } from '@/lib/sse';
 import { LLM_MODEL_ID, type ChatLanguage, type ChatRequestBody } from '@/lib/types';
 import { type LastAction } from '@/components/types';
@@ -27,6 +27,7 @@ export function useChat({ configured, onAction }: UseChatOptions) {
   const [maxTokens, setMaxTokens] = useState(DEFAULT_MAX_TOKENS);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const busyRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
   const slow = useSlow(busy);
@@ -36,20 +37,18 @@ export function useChat({ configured, onAction }: UseChatOptions) {
   }, []);
 
   const buildBody = useCallback(
-    (history: VisibleMessage[], stream: boolean): ChatRequestBody => ({
-      model: LLM_MODEL_ID,
-      messages: [
-        { role: 'system', content: chatLanguageOption(language).system },
-        ...history
-          .filter((message) => message.content.trim().length > 0)
-          .map((message) => ({ role: message.role, content: message.content })),
-      ],
-      temperature: Math.round(temperature * 10) / 10,
-      max_tokens: maxTokens,
-      stream,
-      language,
-    }),
-    [language, maxTokens, temperature],
+    (history: VisibleMessage[], stream: boolean, hint: ChatLanguage): ChatRequestBody => {
+      const turn = buildChatTurn(hint, history);
+      return {
+        model: LLM_MODEL_ID,
+        messages: turn.messages,
+        temperature: Math.round(temperature * 10) / 10,
+        max_tokens: maxTokens,
+        stream,
+        language: turn.language,
+      };
+    },
+    [maxTokens, temperature],
   );
 
   const stop = useCallback(() => {
@@ -57,7 +56,7 @@ export function useChat({ configured, onAction }: UseChatOptions) {
   }, []);
 
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, options?: { language?: ChatLanguage; fromTranscript?: boolean }) => {
       const content = text.trim();
       if (!content || busyRef.current) return;
       if (content.length > MAX_MESSAGE_CHARS) {
@@ -71,9 +70,17 @@ export function useChat({ configured, onAction }: UseChatOptions) {
         return;
       }
 
+      const hint = options?.language ?? language;
+      if (options?.language) setLanguage(options.language);
       const history = [...messages, { id: newId(), role: 'user' as const, content }];
       const assistantId = newId();
-      const body = buildBody(history, true);
+      const body = buildBody(history, true, hint);
+      if (options?.fromTranscript) {
+        const replyLanguage = PROMPT_LANGUAGE_NAME[body.language];
+        setNotice(`Added the transcript to this chat. Replying in ${replyLanguage}.`);
+      } else {
+        setNotice(null);
+      }
       setMessages([...history, { id: assistantId, role: 'assistant', content: '' }]);
       setDraft('');
       setError(null);
@@ -148,13 +155,14 @@ export function useChat({ configured, onAction }: UseChatOptions) {
         abortRef.current = null;
       }
     },
-    [buildBody, configured, messages, onAction],
+    [buildBody, configured, language, messages, onAction],
   );
 
   const clear = useCallback(() => {
     if (busyRef.current) return;
     setMessages([]);
     setError(null);
+    setNotice(null);
   }, []);
 
   return {
@@ -170,6 +178,7 @@ export function useChat({ configured, onAction }: UseChatOptions) {
     busy,
     slow,
     error,
+    notice,
     send,
     stop,
     clear,

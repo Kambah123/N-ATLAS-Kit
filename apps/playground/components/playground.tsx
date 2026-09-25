@@ -265,9 +265,9 @@ export function Playground({ configured }: { configured: boolean }) {
             >
               <SpeechPanel
                 configured={configured}
-                onReply={(text) => {
+                onReply={(text, audioLanguage) => {
                   setTab('chat');
-                  void chat.send(text);
+                  void chat.send(text, { language: audioLanguage, fromTranscript: true });
                 }}
                 onAction={onAction}
                 onBusy={setSpeechBusy}
