@@ -210,7 +210,7 @@ export function SpeechPanel({
   const model = ASR_LANGUAGE_OPTIONS.find((option) => option.id === language)?.model;
 
   return (
-    <section className="min-h-0 flex-1 overflow-y-auto px-4 py-4" aria-label="Speech">
+    <section className="h-full min-h-0 flex-1 overflow-y-auto px-4 py-4" aria-label="Speech">
       <div className="mx-auto flex max-w-xl flex-col gap-4">
         <div>
           <h2 className="text-xl font-semibold tracking-tight">Speech</h2>
@@ -224,7 +224,7 @@ export function SpeechPanel({
           <div
             role="radiogroup"
             aria-label="Transcription language"
-            className="flex flex-wrap gap-2"
+            className="flex gap-2 max-[768px]:flex-nowrap max-[768px]:overflow-x-auto min-[769px]:flex-wrap"
           >
             {ASR_LANGUAGE_OPTIONS.map((option) => {
               const active = option.id === language;
@@ -235,7 +235,7 @@ export function SpeechPanel({
                   role="radio"
                   aria-checked={active}
                   onClick={() => selectAudioLanguage(option.id)}
-                  className={`rounded-full px-3 py-1.5 text-sm ${
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-sm whitespace-nowrap ${
                     active
                       ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
                       : 'border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)]'

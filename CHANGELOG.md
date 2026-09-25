@@ -18,6 +18,10 @@ together from this file.
 
 ### Fixed
 
+- On screens 768px and narrower, the playground footer scrolls in after the
+  app instead of staying pinned, the chat composer stays on screen, and
+  suggestion chips sit on one horizontal row.
+
 - Docs on Vercel serve VitePress clean URLs (`/quickstart`, `/ha/quickstart`,
   and the rest). `docs/vercel.json` sets `cleanUrls` so a direct load is not a
   404 while the `.html` file still exists.
