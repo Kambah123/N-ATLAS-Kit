@@ -1,34 +1,104 @@
-# `/apps/playground` — the N-ATLaS playground
+# N-ATLAS Playground
 
-> **🚧 Not built yet.** This directory is a placeholder. It gets filled in the
-> next milestone.
+A small Next.js app for trying N-ATLaS in the browser: streaming chat, speech
+to text, and a "get the code" panel that shows the same call in curl,
+JavaScript, and Python.
 
-A Next.js (App Router) playground for N-ATLaS, deployable to Vercel. It will
-consume our own `n-atlas` SDK as a workspace dependency — if the SDK is awkward
-to use, we find out here first.
+The browser never sees `NATLAS_API_KEY`. Pages call Next.js route handlers,
+and those handlers call the gateway in [`/serve`](../../serve/README.md).
 
-## What is planned
+## What you can do
 
-| Page             | Features                                                                                                                                      |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Chat**         | Streaming chat, language picker (Hausa / Igbo / Yorùbá / Nigerian English), temperature and max-token sliders, system prompt box, copy button |
-| **Speech**       | Record from the mic or upload audio, pick a language, get the transcript, optionally send it straight into chat                               |
-| **Tools**        | Translate and summarize panels                                                                                                                |
-| **Get the code** | A live panel showing the exact JS, Python and curl that reproduces what you just did                                                          |
+| Tab          | What it does                                                                                                                                                                                                                                                                                   |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Chat**     | Stream a reply from `NCAIR1/N-ATLaS`. Pick a language hint (English, Hausa, Igbo, Yorùbá, Pidgin), try an example prompt, and set temperature and max tokens.                                                                                                                                  |
+| **Speech**   | Record from the microphone or upload `.ogg` (WhatsApp), `.mp3`, `.m4a`, or `.wav`. Choose Hausa, Igbo, Yorùbá, or Nigerian English — each one selects that NCAIR1 ASR model. **Reply to this** sends the transcript into chat. **Translate to English** asks N-ATLaS for an English rendering. |
+| **Get code** | Curl, `fetch`, and `httpx` for the last chat or transcription. The official SDKs (`n-atlas-kit`: `n-atlas` on npm and `natlas` on PyPI) are coming; these snippets do not depend on them.                                                                                                      |
 
-Plus:
+A status pill polls `GET /health`. A cold gateway (Modal scales to zero) shows
+**Waking the model up (first request can take ~2 min)**. The server follows
+the HTTP 303 Modal can return while a container is starting.
 
-- **No fake responses, ever.** With no backend configured the app shows a clear
-  _"No N-ATLAS backend connected"_ state and tells you how to run `/serve`.
-- **Keys never reach the browser.** Every call goes through a Next.js route
-  handler; `NATLAS_BASE_URL` and `NATLAS_API_KEY` stay server-side and are never
-  `NEXT_PUBLIC_*`.
-- **Anonymous usage logging** — request counts per feature and language, plus
-  latency, to Vercel KV or Supabase. **No user content is stored.**
-- Clean Nigerian-themed design, mobile friendly, UI in English and Hausa.
+Prompts and audio are not stored.
 
-## Licence reminder
+## Local development
 
-The footer carries the attribution the N-ATLaS terms require. A public
-deployment is capped at 1,000 active end-users per rolling 30 days.
-See [`NOTICE`](../../NOTICE).
+From the repo root (pnpm workspace):
+
+```bash
+pnpm install
+cp apps/playground/.env.example apps/playground/.env.local
+```
+
+Edit `.env.local`:
+
+```bash
+NATLAS_BASE_URL=http://localhost:8080
+NATLAS_API_KEY=the-key-you-set-as-NATLAS_API_KEYS
+```
+
+`NATLAS_BASE_URL` may be the gateway origin or the origin plus `/v1`. Then:
+
+```bash
+pnpm --filter @n-atlas/playground dev
+```
+
+Open <http://localhost:3000>. With the variables unset, the app stays usable
+and says **No N-ATLAS backend connected** instead of inventing a reply.
+
+```bash
+pnpm --filter @n-atlas/playground test
+pnpm --filter @n-atlas/playground typecheck
+pnpm --filter @n-atlas/playground build
+```
+
+Route-handler tests mock the gateway. They do not need a GPU or a live URL.
+
+## Deploy on Vercel
+
+Create a Vercel project from this repo. These are the settings that matter:
+
+| Setting          | Value                                                               |
+| ---------------- | ------------------------------------------------------------------- |
+| Root Directory   | `apps/playground`                                                   |
+| Framework Preset | Next.js (auto-detected)                                             |
+| Install command  | leave empty (Vercel installs the pnpm workspace from the repo root) |
+| Build command    | leave empty (`next build` from this package)                        |
+| Node.js          | 20.x or 22.x                                                        |
+
+Leave **Include source files outside of the Root Directory** enabled so the
+root `pnpm-lock.yaml` is part of the install.
+
+Environment variables (server only — do **not** use `NEXT_PUBLIC_`):
+
+| Name              | Required | Example                                        |
+| ----------------- | -------- | ---------------------------------------------- |
+| `NATLAS_BASE_URL` | yes      | `https://your-app.modal.run`                   |
+| `NATLAS_API_KEY`  | yes      | one value from the gateway's `NATLAS_API_KEYS` |
+
+Optional: `NATLAS_HEALTH_TIMEOUT_MS` (default `8000`) and
+`NATLAS_UPSTREAM_TIMEOUT_MS` (default `180000`). See `.env.example`.
+
+Chat and transcription routes set `maxDuration = 300` so a cold start has
+time to finish. On a plan that caps functions at 60 seconds, the first
+request after idle can fail and the next one succeeds once the model is
+warm. Raise the project function duration to 300 seconds if the plan allows
+it (Project → Settings → Functions).
+
+The live gateway used while this was built:
+
+`https://kambah123--natlas-serve-natlasservice-serve.modal.run`
+
+Point `NATLAS_BASE_URL` at that origin only if you hold a key for it.
+
+## Attribution
+
+N-ATLaS is an initiative of the Federal Ministry of Communications, Innovation
+and Digital Economy, and powered by Awarri Technologies.
+
+The models use Awarri's Open-Source Research and Innovation License, not
+Apache-2.0. Public deployments are capped at 1,000 active end-users in any
+rolling 30 days. Details are in the repo [`NOTICE`](../../NOTICE). This app's
+code is Apache-2.0.
+
+Built by OneDev Studioo.

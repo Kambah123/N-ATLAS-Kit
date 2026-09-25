@@ -13,6 +13,7 @@ export default tseslint.config(
       '**/build/**',
       '**/coverage/**',
       '**/.next/**',
+      '**/next-env.d.ts',
       '**/.vercel/**',
       '**/.turbo/**',
       '**/*.min.js',

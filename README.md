@@ -144,13 +144,14 @@ behind one OpenAI-compatible base URL, deployable with `docker compose up` or
 
 #### `apps/playground` — Next.js on Vercel
 
-- [ ] Streaming chat with language picker, temperature / max-token sliders, system prompt box
-- [ ] Speech: record from mic or upload, transcribe, push straight into chat
-- [ ] Tools: translate and summarize panels
-- [ ] "Get the code" — live JS, Python and curl for the last action
-- [ ] Clear "No N-ATLAS backend connected" empty state
-- [ ] Anonymous usage counters (feature, language, latency — no content)
-- [ ] Nigerian-themed responsive design, UI in English and Hausa
+- [x] Streaming chat with a language hint (English, Hausa, Igbo, Yorùbá, Pidgin), example prompts, temperature and max-token controls
+- [x] Speech: record from the mic or upload audio, transcribe, reply in chat, optionally translate to English
+- [x] "Get the code" — curl, JavaScript (`fetch`) and Python (`httpx`) for the last request
+- [x] `/health` status, including a cold-start "waking the model up" state
+- [x] Keys stay in server env; in-memory per-IP limits plus input and audio limits
+- [x] Clear "No N-ATLAS backend connected" state when env vars are missing
+- [x] Responsive light/dark UI. See [`apps/playground/README.md`](./apps/playground/README.md)
+- [ ] Dedicated summarize panel, anonymous usage counters, and a full Hausa UI translation
 
 #### `docs/` — English + Hausa
 

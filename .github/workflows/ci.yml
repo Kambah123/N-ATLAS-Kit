@@ -62,6 +62,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Build playground
+        run: pnpm --filter @n-atlas/playground build
+
       - name: Verify the built package is importable as ESM and CJS
         working-directory: packages/js-sdk
         run: |

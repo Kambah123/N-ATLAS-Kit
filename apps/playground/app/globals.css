@@ -1,0 +1,113 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --bg: #f3efe4;
+  --bg-elev: #fffdf8;
+  --bg-sunken: #e8e1d2;
+  --ink: #15211c;
+  --muted: #5c675f;
+  --line: #e0d6c6;
+  --accent: #0e6b45;
+  --accent-ink: #f5fbf7;
+  --header: #073326;
+  --header-ink: #f6f3ea;
+  --header-muted: #c5ddd0;
+  --gold: #8a5a16;
+  --gold-line: #c6a15b;
+  --danger: #8d2f2f;
+  --danger-bg: #fde8e4;
+  --user: #0e6b45;
+  --user-ink: #f4fff8;
+  --shadow: 0 18px 50px rgba(23, 40, 32, 0.08);
+  --ring: #0e6b45;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #081410;
+  --bg-elev: #10201a;
+  --bg-sunken: #0c1914;
+  --ink: #f3efe4;
+  --muted: #b7c3b9;
+  --line: #24362e;
+  --accent: #3dbe7a;
+  --accent-ink: #062117;
+  --header: #04140f;
+  --header-ink: #f6f3ea;
+  --header-muted: #b7cfc2;
+  --gold: #e2c16b;
+  --gold-line: #e2c16b;
+  --danger: #ffb4ae;
+  --danger-bg: #3a1818;
+  --user: #135c3c;
+  --user-ink: #f3efe4;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  --ring: #3dbe7a;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(
+      1000px 420px at 0% -10%,
+      color-mix(in srgb, var(--accent) 16%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      800px 380px at 100% 0%,
+      color-mix(in srgb, var(--gold-line) 20%, transparent),
+      transparent 50%
+    ),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 30%, white);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.font-display {
+  font-family: var(--font-fraunces), Georgia, 'Times New Roman', serif;
+  font-optical-sizing: auto;
+}
+
+input[type='range'] {
+  accent-color: var(--accent);
+  width: 100%;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.82);
+  }
+}
+
+.pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot {
+    animation: none;
+  }
+}
