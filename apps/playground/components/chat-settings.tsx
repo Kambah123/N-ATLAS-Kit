@@ -83,7 +83,7 @@ export function TuneFields({
           type="range"
           min={MIN_MAX_TOKENS}
           max={MAX_MAX_TOKENS}
-          step={64}
+          step={16}
           value={maxTokens}
           onChange={(event) => onMaxTokens(Number(event.target.value))}
         />
