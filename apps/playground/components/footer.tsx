@@ -2,7 +2,7 @@ import { ATTRIBUTION, MODEL_CREDIT, PRIVACY_NOTE } from '@/lib/languages';
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-[var(--line)] bg-[var(--bg-elev)] px-4 py-5 text-xs leading-5 text-[var(--muted)] sm:px-6">
+    <footer className="shrink-0 border-t border-[var(--line)] bg-[var(--bg-elev)] px-4 py-3 text-xs leading-5 text-[var(--muted)] sm:px-6">
       <p className="max-w-3xl text-[var(--ink)]">{ATTRIBUTION}</p>
       <p className="mt-2 max-w-3xl">{MODEL_CREDIT}</p>
       <p className="mt-2 max-w-3xl">

@@ -64,7 +64,7 @@ export function Playground({ configured }: { configured: boolean }) {
       : health;
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <header className="relative overflow-hidden bg-[var(--header)] text-[var(--header-ink)]">
         <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-20" aria-hidden>
           <defs>
@@ -121,7 +121,7 @@ export function Playground({ configured }: { configured: boolean }) {
       </div>
 
       <div className="mx-auto flex w-full max-w-6xl min-h-0 flex-1">
-        <aside className="hidden w-72 shrink-0 border-r border-[var(--line)] px-5 py-6 lg:block">
+        <aside className="hidden w-72 shrink-0 overflow-y-auto border-r border-[var(--line)] px-5 py-6 lg:block">
           <nav className="space-y-1" aria-label="Playground">
             {TABS.map((item) => (
               <button
@@ -184,7 +184,7 @@ export function Playground({ configured }: { configured: boolean }) {
           </div>
         </aside>
 
-        <div className="flex min-h-[70vh] min-w-0 flex-1 flex-col lg:min-h-0">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className={tab === 'chat' ? 'flex min-h-0 flex-1 flex-col' : 'hidden'}>
             <div className="flex justify-end gap-2 border-b border-[var(--line)] px-4 py-2 lg:hidden">
               <button
