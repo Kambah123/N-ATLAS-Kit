@@ -198,7 +198,9 @@ Hugging Face half works, and come back for the GPU half.
 | `HF_TOKEN is empty inside the container` | Secret missing or misnamed | `modal secret create natlas-hf HF_TOKEN=hf_...` — the name must be exactly `natlas-hf` |
 | `GATED - this HF account has not accepted the terms` | You accepted with a different HF account than the one that owns the token | Open the listed URL while logged in as the token's owner |
 | `NOT FOUND` | Typo in the repo id, or a token with too narrow a scope | Use a plain **Read** token |
-| `Could not get a GPU` | No payment method | <https://modal.com/settings/billing> — see the Nigeria notes above |
+| `Could not get a GPU` and the message mentions a payment method | No payment method | <https://modal.com/settings/billing> — see the Nigeria notes above |
+| `Function.with_options` / `modal >= 1.4.3` | The installed `modal` client is older than 1.4.3, so `--gpu` cannot be applied. This is not a billing error. The script still runs the pinned A10 check. | `pip install -U 'modal>=1.4.3'`, or rerun without `--gpu` |
+| `Could not get a GPU` with any other message | Read that message. Quota, an unknown GPU name, or a workspace restriction are all possible. | Fix the cause it names |
 | `Token missing` / `not authenticated` | `modal setup` not completed | Re-run `modal setup` |
 
 ---

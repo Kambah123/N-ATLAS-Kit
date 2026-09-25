@@ -33,7 +33,7 @@ closed, however good the code is.
 
 ## Setting up
 
-You need **Node ≥ 18.17**, **pnpm 9**, **Python ≥ 3.10**, and **ffmpeg** if you
+You need **Node ≥ 20**, **pnpm 9**, **Python ≥ 3.10**, and **ffmpeg** if you
 are touching audio.
 
 ```bash

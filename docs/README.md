@@ -1,43 +1,43 @@
-# `/docs` — documentation, in English and Hausa
+# Docs site
 
-> **🚧 Not built yet.** This directory is a placeholder. It gets filled in a
-> later milestone.
+Static site for N-ATLAS Kit, built with [VitePress](https://vitepress.dev/).
+English is the default locale. Hausa overview and quickstart live under `src/ha/`.
 
-A docs site (Nextra or VitePress), deployable to Vercel. **Every page ships in
-English and Hausa**, with a language switcher — a toolkit for Nigerian
-languages documented only in English would be missing its own point.
+The Hausa pages carry a visible warning: they have **not** been reviewed by a
+native speaker.
 
-## Planned sections
+## Build
 
-- Introduction
-- Quickstart — JS, Python, curl
-- Self-hosting N-ATLaS
-- SDK reference — generated from code comments where possible
-- Speech-to-text guide
-- Examples
-- Fine-tuning pointers
-- FAQ
+From the repository root:
 
-Plus the two pages that prove the integration is real:
+```bash
+pnpm install
+pnpm --filter @n-atlas/docs build
+```
 
-- **N-ATLAS Integration** — exactly how each component uses N-ATLaS: model ids,
-  endpoints, the chat template, ASR routing. With a mermaid architecture
-  diagram.
-- **Architecture** — system diagram, data flow, and security: where keys live,
-  and why no user content is ever logged.
+Output: `docs/.vitepress/dist`. Preview locally with:
 
-## On the Hausa
+```bash
+pnpm --filter @n-atlas/docs preview
+```
 
-Hausa drafted with machine assistance is marked inline:
+`pnpm --filter @n-atlas/docs dev` serves a live reload preview.
 
-> ⚠️ **Needs native review**
+## Deploy to Vercel
 
-Native speakers: clearing one of those markers is one of the most valuable
-contributions you can make to this repo. See
-[`CONTRIBUTING.md`](../CONTRIBUTING.md).
+Create a Vercel project for this repository and set:
 
-## `docs/evidence/`
+| Setting          | Value                                        |
+| ---------------- | -------------------------------------------- |
+| Root Directory   | `docs`                                       |
+| Framework        | VitePress                                    |
+| Install command  | `cd .. && pnpm install --frozen-lockfile`    |
+| Build command    | `cd .. && pnpm --filter @n-atlas/docs build` |
+| Output directory | `.vitepress/dist`                            |
 
-Real, dated outputs captured from a live N-ATLaS endpoint — the proof for the
-NAIC submission that this toolkit talks to the actual model. Generated, not
-hand-written, and git-ignored until it is deliberately committed.
+`vercel.json` in this directory records those commands. The site has no server
+code and no environment variables. Do not put `NATLAS_API_KEY` or `HF_TOKEN`
+in the Vercel project.
+
+The playground (`apps/playground`) is a separate app. Do not point this
+project at that directory.
