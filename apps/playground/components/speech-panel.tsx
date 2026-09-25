@@ -225,7 +225,7 @@ export function SpeechPanel({
 
           <div
             className={`mt-4 rounded-2xl border border-dashed px-4 py-6 text-center ${
-              dragOver ? 'border-[var(--blue)] bg-[var(--bg-sunken)]' : 'border-[var(--line)]'
+              dragOver ? 'border-[var(--accent)] bg-[var(--bg-sunken)]' : 'border-[var(--line)]'
             }`}
             onDragOver={(event) => {
               event.preventDefault();
@@ -293,7 +293,7 @@ export function SpeechPanel({
             <div className="mt-4" role="status">
               <p className="text-sm text-[var(--ink)]">Transcribing…</p>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--bg-sunken)]">
-                <div className="progress-slide h-full w-1/3 rounded-full bg-[var(--blue)]" />
+                <div className="progress-slide h-full w-1/3 rounded-full bg-[var(--accent)]" />
               </div>
             </div>
           ) : null}
@@ -336,7 +336,7 @@ export function SpeechPanel({
                 type="button"
                 disabled={translating || busy}
                 onClick={() => void translate()}
-                className="rounded-xl border border-[var(--blue)] px-4 py-2 text-sm font-medium text-[var(--blue)] disabled:opacity-50"
+                className="rounded-xl border border-[var(--gold-line)] px-4 py-2 text-sm font-medium text-[var(--gold)] disabled:opacity-50"
               >
                 {translating ? 'Translating…' : 'Translate to English'}
               </button>

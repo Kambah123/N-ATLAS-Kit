@@ -96,47 +96,68 @@ export function Playground({ configured }: { configured: boolean }) {
 
   return (
     <div className="flex h-dvh max-w-full flex-col overflow-hidden bg-[var(--bg)] text-[var(--ink)]">
-      <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--line)] bg-[var(--header)] px-3 py-2 sm:px-4">
-        <div className="flex shrink-0 items-center gap-2">
-          <Mark />
-          <div>
-            <h1 className="text-sm font-semibold tracking-tight">N-ATLAS Kit</h1>
-            <p className="font-mono text-[10px] text-[var(--muted)] md:hidden">{LLM_MODEL_ID}</p>
-            <p className="hidden text-[11px] text-[var(--muted)] md:block">Playground</p>
+      <header className="relative shrink-0 overflow-hidden border-b border-black/20 bg-[var(--header)] text-[var(--header-ink)]">
+        <svg
+          className="pointer-events-none absolute inset-0 h-full w-full text-[var(--gold-line)] opacity-30"
+          aria-hidden
+        >
+          <defs>
+            <pattern id="adire" width="28" height="28" patternUnits="userSpaceOnUse">
+              <path
+                d="M14 2 L26 14 L14 26 L2 14 Z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.7"
+              />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#adire)" />
+        </svg>
+        <div className="relative flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4">
+          <div className="flex shrink-0 items-center gap-2">
+            <Mark />
+            <div>
+              <h1 className="text-sm font-semibold tracking-tight text-[var(--header-ink)]">
+                N-ATLAS <span className="text-[var(--gold-line)]">Playground</span>
+              </h1>
+              <p className="font-mono text-[10px] text-[var(--header-muted)] md:hidden">
+                {LLM_MODEL_ID}
+              </p>
+            </div>
           </div>
-        </div>
-        <p className="hidden rounded-full border border-[var(--line)] bg-[var(--bg-sunken)] px-2.5 py-1 font-mono text-[11px] text-[var(--ink)] md:inline">
-          {LLM_MODEL_ID}
-        </p>
-        <StatusPill health={shownHealth} />
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-          <LanguageField language={chat.language} onLanguage={chat.setLanguage} />
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="rounded-xl border border-[var(--line)] p-2 text-[var(--ink)]"
-            aria-label="Toggle color theme"
-          >
-            <IconMoon className="h-4 w-4 dark:hidden" />
-            <IconSun className="hidden h-4 w-4 dark:block" />
-          </button>
-          <a
-            href={DOCS_HREF}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 rounded-xl border border-[var(--blue)] px-2.5 py-1.5 text-xs font-medium text-[var(--blue)]"
-          >
-            <IconDocs className="h-4 w-4" />
-            <span className="hidden sm:inline">Docs</span>
-          </a>
-          <button
-            type="button"
-            onClick={focusCode}
-            className="rounded-xl bg-[var(--accent)] px-2.5 py-1.5 text-xs font-medium text-[var(--accent-ink)]"
-          >
-            <span className="sm:hidden">Code</span>
-            <span className="hidden sm:inline">Get API code</span>
-          </button>
+          <p className="hidden rounded-full border border-white/15 bg-white/10 px-2.5 py-1 font-mono text-[11px] text-[var(--header-ink)] md:inline">
+            {LLM_MODEL_ID}
+          </p>
+          <StatusPill health={shownHealth} />
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+            <LanguageField language={chat.language} onLanguage={chat.setLanguage} />
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="header-control rounded-xl border border-white/20 p-2 text-[var(--header-ink)]"
+              aria-label="Toggle color theme"
+            >
+              <IconMoon className="h-4 w-4 dark:hidden" />
+              <IconSun className="hidden h-4 w-4 dark:block" />
+            </button>
+            <a
+              href={DOCS_HREF}
+              target="_blank"
+              rel="noreferrer"
+              className="header-control inline-flex items-center gap-1 rounded-xl border border-[var(--gold-line)] px-2.5 py-1.5 text-xs font-medium text-[var(--gold-line)]"
+            >
+              <IconDocs className="h-4 w-4" />
+              <span className="hidden sm:inline">Docs</span>
+            </a>
+            <button
+              type="button"
+              onClick={focusCode}
+              className="header-control rounded-xl bg-[var(--gold-line)] px-2.5 py-1.5 text-xs font-medium text-[var(--header)]"
+            >
+              <span className="sm:hidden">Code</span>
+              <span className="hidden sm:inline">Get API code</span>
+            </button>
+          </div>
         </div>
       </header>
 

@@ -115,7 +115,7 @@ export function ChatPanel({
               key={example}
               type="button"
               onClick={() => chat.setDraft(example)}
-              className="shrink-0 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 py-1.5 text-left text-xs text-[var(--ink)] hover:border-[var(--blue)]"
+              className="shrink-0 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 py-1.5 text-left text-xs text-[var(--ink)] hover:border-[var(--gold-line)]"
             >
               {example}
             </button>

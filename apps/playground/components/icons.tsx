@@ -108,9 +108,9 @@ export function IconMoon({ className }: IconProps) {
 export function Mark({ className }: IconProps) {
   return (
     <svg className={className ?? 'h-7 w-7'} viewBox="0 0 32 32" aria-hidden>
-      <rect width="32" height="32" rx="8" fill="#085c38" />
-      <path fill="#fff" d="M8.2 23V9h3.2l4.2 8.5V9H19v14h-3.2l-4.3-8.7V23H8.2z" />
-      <circle cx="24.2" cy="22.8" r="2" fill="#8eb0ff" />
+      <rect width="32" height="32" rx="8" fill="#073326" />
+      <path fill="#f6f3ea" d="M8.2 23V9h3.2l4.2 8.5V9H19v14h-3.2l-4.3-8.7V23H8.2z" />
+      <circle cx="24.2" cy="22.8" r="2" fill="#c6a15b" />
     </svg>
   );
 }

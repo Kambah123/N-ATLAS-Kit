@@ -24,7 +24,7 @@ export function LanguageField({ language, onLanguage }: LanguageFieldProps) {
           const value = event.target.value;
           if (isChatLanguage(value)) onLanguage(value);
         }}
-        className="max-w-[9.5rem] rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 py-1.5 text-xs font-medium text-[var(--ink)]"
+        className="header-control max-w-[9.5rem] rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-[var(--header-ink)]"
       >
         {CHAT_LANGUAGE_OPTIONS.map((option) => (
           <option key={option.id} value={option.id}>
@@ -66,8 +66,12 @@ export function TuneFields({
           max={MAX_TEMPERATURE}
           step={0.1}
           value={temperature}
+          aria-describedby="temperature-hint"
           onChange={(event) => onTemperature(Number(event.target.value))}
         />
+        <span id="temperature-hint" className="mt-1 block text-[11px] text-[var(--muted)]">
+          Lower = more accurate, higher = more creative
+        </span>
       </label>
       <label className="block text-xs">
         <span className="flex items-center justify-between text-[var(--muted)]">
