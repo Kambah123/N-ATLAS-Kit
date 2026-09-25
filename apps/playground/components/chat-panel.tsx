@@ -146,7 +146,7 @@ export function ChatPanel({
             }}
             rows={2}
             placeholder={option.placeholder}
-            className="min-h-14 flex-1 resize-y rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 py-3 text-sm leading-6 text-[var(--ink)]"
+            className="max-h-28 min-h-14 min-w-0 flex-1 resize-y rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 py-3 text-sm leading-6 text-[var(--ink)]"
           />
           {chat.busy ? (
             <button

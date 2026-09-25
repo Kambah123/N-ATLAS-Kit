@@ -64,7 +64,7 @@ export function Playground({ configured }: { configured: boolean }) {
       : health;
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
+    <div className="flex h-dvh max-w-full flex-col overflow-hidden">
       <header className="relative overflow-hidden bg-[var(--header)] text-[var(--header-ink)]">
         <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-20" aria-hidden>
           <defs>
