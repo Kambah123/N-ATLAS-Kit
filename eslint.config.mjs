@@ -19,6 +19,7 @@ export default tseslint.config(
       'packages/python-sdk/**',
       'serve/**',
       'docs/.vitepress/cache/**',
+      'docs/.vitepress/dist/**',
     ],
   },
   js.configs.recommended,

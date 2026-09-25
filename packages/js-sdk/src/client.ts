@@ -33,7 +33,7 @@ import type {
 import { VERSION } from './version.js';
 
 export interface NAtlasOptions extends ConfigInput {
-  /** Override `fetch`. Tests use this; browsers and Node 18+ use the global. */
+  /** Override `fetch`. Tests use this; browsers and Node 20+ use the global. */
   fetch?: FetchLike;
   /** Override the retry delay. Tests use this to avoid waiting. */
   sleep?: Sleep;
@@ -325,7 +325,7 @@ async function* iterateChat(response: Response): AsyncGenerator<ChatStreamChunk>
 
 function defaultFetch(): FetchLike {
   if (typeof globalThis.fetch !== 'function') {
-    throw new NAtlasError('This runtime has no fetch. Use Node 18+ or a modern browser.');
+    throw new NAtlasError('This runtime has no fetch. Use Node 20+ or a modern browser.');
   }
   return (input, init) => globalThis.fetch(input, init);
 }

@@ -4,6 +4,17 @@ Small programs that call a real N-ATLaS gateway through the SDKs. None of them
 print a fabricated reply. If `NATLAS_BASE_URL` or `NATLAS_API_KEY` is missing,
 they say so and exit.
 
+| Example                                             | What it does                                                                                                         |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [`voice-note-translator`](./voice-note-translator/) | Audio in Hausa, Igbo, Yorùbá, or Nigerian English → transcript → translation or reply. CLI and a page on `127.0.0.1` |
+| [`support-reply`](./support-reply/)                 | Draft a customer-support reply in the customer's language                                                            |
+| [`js/`](./js/) and [`python/`](./python/)           | One-file chat, stream, and transcribe scripts                                                                        |
+
+The [docs site](../docs/) has the same walkthrough. The
+[playground](../apps/playground/) is the browser app and is built separately.
+
+## One-file scripts
+
 Build or install the SDK first. The JavaScript scripts import the built
 package, not the TypeScript source.
 
@@ -26,17 +37,8 @@ python examples/python/transcribe.py path/to/note.ogg ha
 `transcribe` takes a language as the second argument (`ha`, `ig`, `yo`, `en`,
 or an alias such as `hausa`). It defaults to Hausa.
 
-These scripts were checked for syntax and for the missing-env path. They were
-not run against a GPU or a live gateway.
-
-## Still planned
-
-Larger sample apps, each with its own README, are not in this tree yet:
-
-| Example                           | Stack   | What it does                                                                    |
-| --------------------------------- | ------- | ------------------------------------------------------------------------------- |
-| `hausa-chatbot-cli`               | Python  | A terminal chatbot that talks Hausa, using `natlas`                             |
-| `whatsapp-voice-note-transcriber` | Node    | Takes an `.ogg` voice note → transcribes it in Hausa → translates it to English |
-| `yoruba-summarizer`               | JS      | Summarises a long Yorùbá document                                               |
-| `nextjs-chat-starter`             | Next.js | A minimal template to clone and ship                                            |
-| `colab-notebook`                  | Jupyter | Loads the SDK and calls a hosted endpoint                                       |
+The voice-note app and the support-reply helper have their own READMEs, tests,
+and `.env.example` files. Their tests use a fake client and do not call a
+gateway. The one-file scripts were checked for syntax and for the missing-env
+path. None of the examples in this tree have been run against a GPU or the
+live Modal gateway from this checkout.
