@@ -98,7 +98,7 @@ Same API in Python. Same API in the browser. Same API on the edge.
 | JavaScript SDK | [`packages/js-sdk`](./packages/js-sdk/) — npm name `n-atlas`                                                                          |
 | Python SDK     | [`packages/python-sdk`](./packages/python-sdk/) — import name `natlas`                                                                |
 | Examples       | [`examples/`](./examples/) — voice-note translator and a support-reply helper, plus short scripts                                     |
-| Playground     | [`apps/playground`](./apps/playground/) — browser UI, built on its own track                                                          |
+| Playground     | [`apps/playground`](./apps/playground/) — browser chat, speech, and get-code                                                          |
 | Gateway        | [`serve/`](./serve/) — self-host with Modal or Docker Compose                                                                         |
 | Live health    | <https://kambah123--natlas-serve-natlasservice-serve.modal.run/health> (no API key; scales to zero, so a cold start can take minutes) |
 
@@ -111,8 +111,8 @@ path, once you have it, is the [docs quickstart](./docs/src/quickstart.md) or
 
 ## Status
 
-**The gateway, both client SDKs, the docs site, and two example apps are in
-the tree.** The playground, the Python CLI, and the local `transformers`
+**The gateway, both client SDKs, the docs site, two example apps, and the
+playground are in the tree.** The Python CLI and the local `transformers`
 backend are not.
 
 [`serve/`](./serve/) puts N-ATLaS and all four ASR models behind one
@@ -171,13 +171,14 @@ SDK tests mock HTTP. Nothing in this repo was run against a real GPU.
 
 #### `apps/playground` — Next.js on Vercel
 
-- [ ] Streaming chat with language picker, temperature / max-token sliders, system prompt box
-- [ ] Speech: record from mic or upload, transcribe, push straight into chat
-- [ ] Tools: translate and summarize panels
-- [ ] "Get the code" — live JS, Python and curl for the last action
-- [ ] Clear "No N-ATLAS backend connected" empty state
-- [ ] Anonymous usage counters (feature, language, latency — no content)
-- [ ] Nigerian-themed responsive design, UI in English and Hausa
+- [x] Streaming chat with a language hint (English, Hausa, Igbo, Yorùbá, Pidgin), example prompts, temperature and max-token controls
+- [x] Speech: record from the mic or upload audio, transcribe, reply in chat, optionally translate to English
+- [x] "Get the code" — curl, JavaScript (`n-atlas`) and Python (`natlas`) for the last request
+- [x] `/health` status, including a cold-start "waking the model up" state
+- [x] Keys stay in server env; in-memory per-IP limits plus input and audio limits
+- [x] Clear "No N-ATLAS backend connected" state when env vars are missing
+- [x] Responsive light/dark UI. See [`apps/playground/README.md`](./apps/playground/README.md)
+- [ ] Dedicated summarize panel, anonymous usage counters, and a full Hausa UI translation
 
 #### `docs/` — English + Hausa
 
