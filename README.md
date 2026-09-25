@@ -11,7 +11,7 @@ The developer toolkit for N-ATLaS, Nigeria's sovereign multilingual LLM.
 [![Playground](https://img.shields.io/badge/playground-live-1a7f4e)](https://natlas-playground.vercel.app)
 [![Docs](https://img.shields.io/badge/docs-live-1a7f4e)](https://natlas-docs.vercel.app)
 
-[Playground](https://natlas-playground.vercel.app) · [Docs](https://natlas-docs.vercel.app) · [Hausa docs](https://natlas-docs.vercel.app/ha/) · [Demo](https://natlas-docs.vercel.app/#see-it-in-action)
+[Playground](https://natlas-playground.vercel.app) · [Docs](https://natlas-docs.vercel.app) · [Hausa docs](https://natlas-docs.vercel.app/ha/) · [Templates](https://natlas-docs.vercel.app/templates) · [Demo](https://natlas-docs.vercel.app/#see-it-in-action)
 
 Hausa · Igbo · Yorùbá · Nigerian English · Pidgin (beta)
 

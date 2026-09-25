@@ -18,6 +18,7 @@ export const MAX_AUDIO_SECONDS = 120;
 export const RATE_LIMITS = {
   chat: { limit: 30, windowMs: 10 * 60 * 1000 },
   transcribe: { limit: 10, windowMs: 10 * 60 * 1000 },
+  speech: { limit: 20, windowMs: 10 * 60 * 1000 },
   health: { limit: 90, windowMs: 10 * 60 * 1000 },
 } as const;
 

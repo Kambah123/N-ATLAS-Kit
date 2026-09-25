@@ -39,6 +39,7 @@ client.chat.completions.create(
 |---|---|---|---|
 | `POST` | `/v1/chat/completions` | Bearer | `NCAIR1/N-ATLaS` via vLLM. Streaming supported. |
 | `POST` | `/v1/audio/transcriptions` | Bearer | Routes to the NCAIR1 ASR model for `language`. |
+| `POST` | `/v1/audio/speech` | Bearer | MMS-TTS for `ha`, `ig`, `yo`, and `en`. Pidgin (`pcm`) is read in English and the response says so. Needs a Modal redeploy before it exists on the live gateway. |
 | `GET`  | `/v1/models` | Bearer | Proxied from vLLM. |
 | `GET`  | `/health` | none | Upstream status. Safe for a load balancer. |
 

@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TuneFields } from '@/components/chat-settings';
 import { IconMic, IconPaperclip } from '@/components/icons';
+import { useSpeaker } from '@/components/use-speaker';
+import { useVoiceInput } from '@/components/use-voice-input';
 import { WakingCard } from '@/components/waking-card';
 import { type ChatController } from '@/components/use-chat';
 import { chatLanguageOption } from '@/lib/languages';
@@ -12,20 +14,49 @@ type Chat = ChatController;
 export function ChatPanel({
   chat,
   configured,
-  onOpenSpeech,
   onAttachAudio,
 }: {
   chat: Chat;
   configured: boolean;
-  onOpenSpeech: () => void;
   onAttachAudio: () => void;
 }) {
   const option = chatLanguageOption(chat.language);
   const endRef = useRef<HTMLDivElement>(null);
+  const spokenRef = useRef<string | null>(null);
+  const [autoSpeak, setAutoSpeak] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const speaker = useSpeaker();
+  const voice = useVoiceInput({
+    language: chat.language,
+    disabled: !configured || chat.busy,
+    onTranscript: (text) => {
+      setVoiceError(null);
+      void chat.send(text, { fromTranscript: true });
+    },
+    onError: setVoiceError,
+  });
+
+  useEffect(() => {
+    try {
+      setAutoSpeak(localStorage.getItem('natlas-auto-speak') === '1');
+    } catch {
+      /* Private mode can refuse storage. The toggle still works for this view. */
+    }
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: 'end' });
   }, [chat.messages]);
+
+  useEffect(() => {
+    if (!autoSpeak || chat.busy) return;
+    const last = [...chat.messages]
+      .reverse()
+      .find((message) => message.role === 'assistant' && message.content.trim().length > 0);
+    if (!last || spokenRef.current === last.id) return;
+    spokenRef.current = last.id;
+    void speaker.speak(last);
+  }, [autoSpeak, chat.busy, chat.messages, speaker]);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label="Chat">
@@ -84,6 +115,18 @@ export function ChatPanel({
                 {message.role === 'assistant' && chat.busy && message.content.length > 0 ? (
                   <span className="pulse-dot ml-1 inline-block h-2 w-2 rounded-full bg-[var(--accent)]" />
                 ) : null}
+                {message.role === 'assistant' && message.content.trim().length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (speaker.speakingId === message.id) speaker.stop();
+                      else void speaker.speak(message);
+                    }}
+                    className="mt-2 rounded-lg border border-[var(--line)] px-2 py-1 text-xs font-medium text-[var(--ink)]"
+                  >
+                    {speaker.speakingId === message.id ? 'Stop' : 'Play'}
+                  </button>
+                ) : null}
               </div>
             </article>
           ))
@@ -115,6 +158,24 @@ export function ChatPanel({
         {chat.notice ? (
           <p className="mb-2 text-xs text-[var(--muted)]" role="status">
             {chat.notice}
+          </p>
+        ) : null}
+        {voiceError ? (
+          <p
+            className="mb-2 rounded-xl bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger)]"
+            role="alert"
+          >
+            {voiceError}
+          </p>
+        ) : null}
+        {voice.transcribing ? (
+          <p className="mb-2 text-xs text-[var(--muted)]" role="status">
+            Transcribing…
+          </p>
+        ) : null}
+        {speaker.note ? (
+          <p className="mb-2 text-xs text-[var(--muted)]" role="status">
+            {speaker.note}
           </p>
         ) : null}
         <div className="mb-2 flex gap-2 max-[768px]:flex-nowrap max-[768px]:overflow-x-auto max-[768px]:pb-1 min-[769px]:flex-wrap">
@@ -150,11 +211,23 @@ export function ChatPanel({
           <div className="flex flex-wrap items-center gap-1 px-2 pb-2">
             <button
               type="button"
-              onClick={onOpenSpeech}
-              className="rounded-xl p-2 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
-              aria-label="Transcribe audio"
+              onClick={() => void voice.toggle()}
+              disabled={voice.transcribing || chat.busy}
+              className={`rounded-xl p-2 hover:bg-[var(--bg-sunken)] disabled:opacity-50 ${
+                voice.recording
+                  ? 'text-[var(--danger)]'
+                  : 'text-[var(--muted)] hover:text-[var(--ink)]'
+              }`}
+              aria-label={voice.recording ? 'Stop recording' : 'Speak a message'}
+              aria-pressed={voice.recording}
             >
-              <IconMic />
+              {voice.recording ? (
+                <span className="px-1 text-xs font-medium">
+                  {Math.floor(voice.elapsed / 60)}:{String(voice.elapsed % 60).padStart(2, '0')}
+                </span>
+              ) : (
+                <IconMic />
+              )}
             </button>
             <button
               type="button"
@@ -177,6 +250,29 @@ export function ChatPanel({
                 />
               </div>
             </details>
+            <button
+              type="button"
+              aria-pressed={autoSpeak}
+              aria-label="Read replies aloud"
+              onClick={() => {
+                setAutoSpeak((current) => {
+                  const next = !current;
+                  try {
+                    localStorage.setItem('natlas-auto-speak', next ? '1' : '0');
+                  } catch {
+                    /* The toggle still applies for this view. */
+                  }
+                  return next;
+                });
+              }}
+              className={`rounded-xl px-2 py-2 text-xs font-medium ${
+                autoSpeak
+                  ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
+                  : 'text-[var(--muted)] hover:bg-[var(--bg-sunken)]'
+              }`}
+            >
+              {autoSpeak ? 'Auto on' : 'Auto'}
+            </button>
             <p className="ml-auto hidden text-[11px] text-[var(--muted)] sm:block">
               Enter sends, Shift+Enter adds a line.
             </p>

@@ -271,6 +271,29 @@ jobs:
       - name: Build the docs site
         run: pnpm --filter @n-atlas/docs build
 
+  templates:
+    name: Templates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build the Hausa support app
+        working-directory: templates/hausa-support
+        run: npm install && npx next build
+
+      - name: Build the farmer-advice app
+        working-directory: templates/farmer-advice
+        run: npm install && npx next build
+
+      - name: Check the WhatsApp bot
+        working-directory: templates/whatsapp-bot
+        run: npm install && node --check bot.mjs
+
   # ---------------------------------------------------------------------------
   # Example apps. JS tests also run inside the JS SDK job via pnpm -r.
   # The Python example is not part of that workspace script.

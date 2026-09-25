@@ -28,6 +28,15 @@ together from this file.
 
 ### Added
 
+- Playground voice chat: the mic transcribes with the existing NCAIR1 speech
+  models and sends the text to N-ATLaS. Assistant replies have play/stop, and
+  an Auto toggle reads them aloud. Hausa, Igbo, Yorùbá, and English use MMS-TTS
+  after a Modal redeploy; until then the browser voice is used when one exists.
+  Pidgin is recognized with the Nigerian English model and read in English,
+  with a note.
+- Starter apps in `templates/`: a Hausa support chatbot, a farmer-advice bot,
+  and a WhatsApp Cloud API bot. Docs: `/templates` and `/ha/templates`.
+
 - Playground demo videos on the docs home page (English and Hausa) and the
   chat recording on both quickstarts. The root README shows GIF previews that
   link to the full recordings.

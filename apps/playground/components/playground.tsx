@@ -27,6 +27,7 @@ import { isRecord, LLM_MODEL_ID } from '@/lib/types';
 type Tab = 'chat' | 'speech' | 'code';
 
 const DOCS_HREF = 'https://natlas-docs.vercel.app';
+const TEMPLATES_HREF = 'https://natlas-docs.vercel.app/templates';
 const GITHUB_HREF = 'https://github.com/Kambah123/N-ATLAS-Kit';
 const X_HREF = 'https://x.com/0xSkamber';
 
@@ -112,7 +113,6 @@ export function Playground({ configured }: { configured: boolean }) {
     setTab('code');
   }, [tab]);
 
-  const openSpeech = useCallback(() => setTab('speech'), []);
   const attachAudio = useCallback(() => {
     setTab('speech');
     setUploadRequest((value) => value + 1);
@@ -175,6 +175,14 @@ export function Playground({ configured }: { configured: boolean }) {
               >
                 <IconDocs className="h-4 w-4" />
                 <span className="hidden sm:inline">Docs</span>
+              </a>
+              <a
+                href={TEMPLATES_HREF}
+                target="_blank"
+                rel="noreferrer"
+                className="header-control hidden items-center rounded-xl border border-[var(--gold-line)] px-2.5 py-1.5 text-xs font-medium text-[var(--gold-line)] sm:inline-flex"
+              >
+                Templates
               </a>
               <button
                 type="button"
@@ -276,12 +284,7 @@ export function Playground({ configured }: { configured: boolean }) {
                   tab === 'chat' ? 'flex' : 'hidden'
                 } min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] shadow-[var(--shadow)]`}
               >
-                <ChatPanel
-                  chat={chat}
-                  configured={configured}
-                  onOpenSpeech={openSpeech}
-                  onAttachAudio={attachAudio}
-                />
+                <ChatPanel chat={chat} configured={configured} onAttachAudio={attachAudio} />
               </div>
               <div
                 className={`${
