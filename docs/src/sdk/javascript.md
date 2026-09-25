@@ -4,6 +4,11 @@ Package: `n-atlas`. Source: `packages/js-sdk`. Node.js 20+ and modern browsers.
 ESM and CJS. The runtime dependency is global `fetch`. Reading a filesystem
 path uses `node:fs` and only works on Node.
 
+`npm install n-atlas` works after the package is published. It is not on npm
+yet. Not on npm/PyPI yet? Install from GitHub (the repository must be public):
+`pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk"`. `npm install` of
+the repository URL installs the private workspace root, not `n-atlas`.
+
 ```ts
 import { NAtlas } from 'n-atlas';
 

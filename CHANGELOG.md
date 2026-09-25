@@ -10,8 +10,18 @@ together from this file.
 
 ## [Unreleased]
 
+### Added
+
+- `.github/workflows/release.yml` publishes `n-atlas` to npm (provenance, public)
+  and `natlas` to PyPI (Trusted Publishing, no token). Beginner steps are in
+  `docs/RELEASING.md`.
+
 ### Changed
 
+- `n-atlas` and `natlas` are 0.1.0, the first version prepared for the
+  registries. Homepages point at <https://natlas-docs.vercel.app>. Install
+  docs say the packages are not on npm or PyPI yet and give a GitHub install
+  that needs a public repository.
 - JavaScript support is Node 20 and newer. Node 18 is EOL, and the JS SDK job
   on pull request #2 failed only on Node 18: `File is not defined` while the
   transcription tests inspected a multipart upload. Node 20 and 22 were

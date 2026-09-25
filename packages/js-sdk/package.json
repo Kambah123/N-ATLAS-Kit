@@ -1,6 +1,6 @@
 {
   "name": "n-atlas",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Official-style developer SDK for N-ATLaS, Nigeria's sovereign multilingual LLM (Hausa, Igbo, Yoruba, Nigerian English) and its ASR models.",
   "keywords": [
     "n-atlas",
@@ -16,7 +16,7 @@
   ],
   "license": "Apache-2.0",
   "author": "OneDev Studioo",
-  "homepage": "https://github.com/Kambah123/N-ATLAS-Kit/tree/main/packages/js-sdk#readme",
+  "homepage": "https://natlas-docs.vercel.app",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Kambah123/N-ATLAS-Kit.git",
@@ -53,6 +53,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "prepare": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

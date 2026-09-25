@@ -16,6 +16,16 @@ is no public hosted API, and this package will not call any other vendor's model
 npm install n-atlas      # or: pnpm add n-atlas / yarn add n-atlas
 ```
 
+That registry install works after the package is published. It is not on npm yet.
+
+Not on npm/PyPI yet? Install from GitHub. The repository must be public.
+
+```bash
+pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk"
+```
+
+`npm install` of the repository URL installs the private workspace root, not `n-atlas`. The `pnpm` command above is the one that selects `packages/js-sdk` and builds it.
+
 Node 20+ and modern browsers. ESM and CJS, built with tsup. The runtime
 dependency is `fetch` (global in Node 20+ and browsers). Reading a filesystem
 path uses Node's `fs` and is not available in the browser — pass a `Blob`,

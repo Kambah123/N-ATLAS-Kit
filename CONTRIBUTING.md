@@ -148,6 +148,13 @@ NATLAS_BASE_URL=http://localhost:8080/v1 NATLAS_API_KEY=... pnpm test
 
 ---
 
+## Publishing
+
+`n-atlas` (npm) and `natlas` (PyPI) are published from GitHub Actions, not from
+a laptop. The button is **Actions → Release → Run workflow**. The npm token,
+the PyPI pending Trusted Publisher, and the exact field values are in
+[`docs/RELEASING.md`](./docs/RELEASING.md).
+
 ## Translations
 
 This is the contribution we want most.

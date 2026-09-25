@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { type LastAction } from '@/components/types';
-import { JS_SDK_HREF, PY_SDK_HREF, renderSnippets } from '@/lib/snippets';
+import { JS_SDK_HREF, PY_SDK_HREF, renderSnippets, SDK_NOTE } from '@/lib/snippets';
 
 const TABS = [
   { id: 'curl', label: 'curl', file: 'request.sh' },
@@ -53,6 +53,9 @@ export function CodePanel({ action }: { action: LastAction | null }) {
           {action ? action.title : 'Waiting for a request'}
         </p>
       </div>
+      <p className="shrink-0 border-b border-[var(--line)] px-3 py-1.5 text-xs leading-5 text-[var(--muted)]">
+        {SDK_NOTE}
+      </p>
       <div className="flex shrink-0 items-center gap-2 border-b border-[var(--code-line)] bg-[var(--code-bg)] px-3 py-1.5">
         <span className="font-mono text-xs text-[var(--code-ink)]">{file}</span>
         <button

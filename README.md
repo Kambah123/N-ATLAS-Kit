@@ -43,6 +43,15 @@ npm install n-atlas          #  JS / TS
 pip install natlas           #  Python
 ```
 
+`n-atlas` and `natlas` are not on npm or PyPI yet. Not on npm/PyPI yet? Install from GitHub. The repository must be public.
+
+```bash
+pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk"
+pip install "git+https://github.com/Kambah123/N-ATLAS-Kit.git#subdirectory=packages/python-sdk"
+```
+
+`npm install` of the repository URL installs the private workspace root, not `n-atlas`. Use the `pnpm` command for JavaScript.
+
 ```ts
 import { NAtlas } from 'n-atlas';
 
@@ -68,12 +77,12 @@ Same API in Python. Same API in the browser. Same API on the edge.
 
 ### Four things, one repo
 
-|                                  |                                                                                                                                         |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| 🧰 **Two SDKs**                  | `n-atlas` (npm) and `natlas` (PyPI). Typed, tested, zero heavy deps, pluggable backends.                                                |
-| 🖥️ **A self-hosting kit**        | One command puts the LLM _and_ all four ASR models behind a single OpenAI-compatible base URL, on one GPU.                              |
-| 🎛️ **A playground**              | Chat, speech and tools in the browser — with a "get the code" panel that hands you the exact JS, Python and curl for what you just did. |
-| 📚 **Docs in English and Hausa** | VitePress site in [`docs/`](./docs/). Hausa overview and quickstart are drafts and say so until a native speaker reviews them.          |
+|                                  |                                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🧰 **Two SDKs**                  | `n-atlas` (npm) and `natlas` (PyPI). Typed, tested, zero heavy deps, pluggable backends. Not published yet — see the GitHub install above. |
+| 🖥️ **A self-hosting kit**        | One command puts the LLM _and_ all four ASR models behind a single OpenAI-compatible base URL, on one GPU.                                 |
+| 🎛️ **A playground**              | Chat, speech and tools in the browser — with a "get the code" panel that hands you the exact JS, Python and curl for what you just did.    |
+| 📚 **Docs in English and Hausa** | VitePress site in [`docs/`](./docs/). Hausa overview and quickstart are drafts and say so until a native speaker reviews them.             |
 
 ### Principles
 
