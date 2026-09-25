@@ -1,3 +1,10 @@
+<script setup>
+const chatSrc = '/videos/chat-code.mp4';
+const chatPoster = '/videos/chat-code.jpg';
+const speechSrc = '/videos/speech-yoruba.mp4';
+const speechPoster = '/videos/speech-yoruba.jpg';
+</script>
+
 # N-ATLAS Kit
 
 ::: danger Ana buƙatar bita daga mai Hausa na asali
@@ -17,6 +24,20 @@ da aka yi rikodin a dukkan yankunan Najeriya shida. Wannan repo ba ya ɗauke da
 nauyin samfurin. Abin da yake ɗauka shi ne mai kira da kuma kayan girka.
 
 Turanci na wannan shafin yana nan: [Overview](/).
+
+## Ka ga yadda yake aiki
+
+Bidiyo biyu daga [playground](https://natlas-playground.vercel.app).
+
+<figure class="demo-figure">
+  <video class="demo-video" controls muted playsinline preload="metadata" :poster="chatPoster" :src="chatSrc"></video>
+  <figcaption>Tattaunawar Hausa a playground, sannan Get code yana kwafa kiran SDK.</figcaption>
+</figure>
+
+<figure class="demo-figure">
+  <video class="demo-video" controls muted playsinline preload="metadata" :poster="speechPoster" :src="speechSrc"></video>
+  <figcaption>Tattaunawar Yorùbá da Tune, sannan Speech yana juya sauti zuwa rubutu kuma yana fassara shi.</figcaption>
+</figure>
 
 ## Me ya sa
 

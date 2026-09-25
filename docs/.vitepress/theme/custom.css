@@ -1,0 +1,26 @@
+.demo-figure {
+  margin: 1.25rem 0 1.75rem;
+}
+
+.demo-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid #c6a15b;
+  background: #f3efe4;
+  box-shadow: 0 10px 28px rgba(7, 51, 38, 0.12);
+}
+
+html.dark .demo-video {
+  background: #081410;
+  border-color: #c6a15b;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+.demo-figure figcaption {
+  margin-top: 0.55rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--vp-c-text-2);
+}

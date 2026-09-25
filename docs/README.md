@@ -34,6 +34,11 @@ Create a Vercel project for this repository and set:
 | Install command  | `cd .. && pnpm install --frozen-lockfile`    |
 | Build command    | `cd .. && pnpm --filter @n-atlas/docs build` |
 | Output directory | `.vitepress/dist`                            |
+| Clean URLs       | `true` (`cleanUrls` in `vercel.json`)        |
+
+VitePress writes `quickstart.html` and links to `/quickstart`. `cleanUrls` makes
+Vercel serve those extensionless paths, including `/ha/quickstart`. Without it,
+a direct load or refresh returns 404 while `/quickstart.html` still returns 200.
 
 `vercel.json` in this directory records those commands. The site has no server
 code and no environment variables. Do not put `NATLAS_API_KEY` or `HF_TOKEN`

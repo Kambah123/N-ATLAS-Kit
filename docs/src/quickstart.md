@@ -1,3 +1,8 @@
+<script setup>
+const chatSrc = '/videos/chat-code.mp4';
+const chatPoster = '/videos/chat-code.jpg';
+</script>
+
 # Quickstart
 
 You need a running N-ATLaS gateway. Either use one someone has already deployed
@@ -29,6 +34,19 @@ either. `GET /health` is always on the host root, not under `/v1`.
 
 A Hausa draft of this page is at [Farawa](/ha/quickstart). It has not been
 reviewed by a native speaker.
+
+<figure class="demo-figure">
+  <video class="demo-video" controls muted playsinline preload="metadata" :poster="chatPoster" :src="chatSrc"></video>
+  <figcaption>Hausa chat in the playground, then Get code copies a working SDK call.</figcaption>
+</figure>
+
+## Install
+
+```bash
+npm install n-atlas
+# or: pnpm add n-atlas
+pip install natlas
+```
 
 ## JavaScript
 

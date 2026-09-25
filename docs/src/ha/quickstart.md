@@ -1,3 +1,8 @@
+<script setup>
+const chatSrc = '/videos/chat-code.mp4';
+const chatPoster = '/videos/chat-code.jpg';
+</script>
+
 # Farawa
 
 ::: danger Ana buƙatar bita daga mai Hausa na asali
@@ -34,6 +39,19 @@ export NATLAS_API_KEY=your-gateway-key
 
 `NATLAS_BASE_URL` na iya zama tushen URL, ko tushen tare da `/v1`. Dukkan SDKs
 suna karɓa. `GET /health` koyaushe yana kan tushen host, ba ƙarƙashin `/v1` ba.
+
+<figure class="demo-figure">
+  <video class="demo-video" controls muted playsinline preload="metadata" :poster="chatPoster" :src="chatSrc"></video>
+  <figcaption>Tattaunawar Hausa a playground, sannan Get code yana kwafa kiran SDK.</figcaption>
+</figure>
+
+## Install
+
+```bash
+npm install n-atlas
+# or: pnpm add n-atlas
+pip install natlas
+```
 
 ## JavaScript
 
