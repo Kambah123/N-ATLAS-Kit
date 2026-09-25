@@ -10,6 +10,13 @@ together from this file.
 
 ## [Unreleased]
 
+### Changed
+
+- JavaScript support is Node 20 and newer. Node 18 is EOL, and the JS SDK job
+  on pull request #2 failed only on Node 18: `File is not defined` while the
+  transcription tests inspected a multipart upload. Node 20 and 22 were
+  already green. `engines` is `>=20`.
+
 ### Fixed
 
 - Modal image build: `vllm/vllm-openai:v0.11.0` has `python3` and no `python`
@@ -31,6 +38,11 @@ together from this file.
   HTTP and do not call a GPU.
 - Runnable examples under `examples/js` and `examples/python` for chat,
   streaming, and transcription.
+- VitePress docs site in `docs/` (English reference, plus Hausa overview and
+  quickstart marked as needing native-speaker review).
+- `examples/voice-note-translator` (CLI and local page) and
+  `examples/support-reply` (multilingual customer-support draft). Both refuse
+  to invent output when the gateway is not configured.
 
 - pnpm workspace monorepo: `packages/js-sdk`, `packages/python-sdk`, `serve`,
   `apps/playground`, `docs`, `examples`.
@@ -42,7 +54,7 @@ together from this file.
 - Verified N-ATLaS model metadata exported from both SDKs — LLM repo id,
   usable context, the four ASR repo ids, and the Whisper Small 30 s / 16 kHz
   constraints.
-- GitHub Actions CI: JS on Node 18/20/22, Python on 3.10–3.13, plus a
+- GitHub Actions CI: JS on Node 20/22, Python on 3.10–3.13, plus a
   guardrails job that fails the build on committed secrets, committed model
   weights, or a dependency on any non-N-ATLaS LLM SDK.
 - Apache-2.0 `LICENSE` for the repository's code, and a `NOTICE` recording the

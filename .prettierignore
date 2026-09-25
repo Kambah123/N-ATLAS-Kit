@@ -15,6 +15,10 @@ serve/
 **/__pycache__/
 **/*.py
 
+# Generated docs output
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
 # Generated evidence / fixtures
 docs/evidence/
 **/*.ogg

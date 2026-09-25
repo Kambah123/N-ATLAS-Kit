@@ -29,7 +29,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: ["18", "20", "22"]
+        # Node 18 is EOL (ended 2025-04-30). Transcription uses the global
+        # File constructor, which Node only provides from 20 onward. On Node 18
+        # the suite dies with `ReferenceError: File is not defined` while
+        # reading the multipart body. engines is `>=20` for the same reason.
+        node: ["20", "22"]
     steps:
       - uses: actions/checkout@v4
 
@@ -237,6 +241,70 @@ jobs:
           else:
               raise SystemExit('FAIL: the gateway started with no API keys')
           "
+
+  # ---------------------------------------------------------------------------
+  # Docs site. VitePress, static output, no secrets.
+  # ---------------------------------------------------------------------------
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the docs site
+        run: pnpm --filter @n-atlas/docs build
+
+  # ---------------------------------------------------------------------------
+  # Example apps. JS tests also run inside the JS SDK job via pnpm -r.
+  # The Python example is not part of that workspace script.
+  # ---------------------------------------------------------------------------
+  examples:
+    name: Examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Voice-note translator tests
+        run: pnpm --filter @n-atlas/example-voice-note test
+
+      - name: Install the Python SDK and test the support-reply example
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e packages/python-sdk
+          python -m unittest examples/support-reply/test_reply.py
 
   # ---------------------------------------------------------------------------
   # Repo hygiene: no secrets, no model weights, no wrapped foreign LLMs

@@ -73,7 +73,7 @@ Same API in Python. Same API in the browser. Same API on the edge.
 | 🧰 **Two SDKs**                  | `n-atlas` (npm) and `natlas` (PyPI). Typed, tested, zero heavy deps, pluggable backends.                                                |
 | 🖥️ **A self-hosting kit**        | One command puts the LLM _and_ all four ASR models behind a single OpenAI-compatible base URL, on one GPU.                              |
 | 🎛️ **A playground**              | Chat, speech and tools in the browser — with a "get the code" panel that hands you the exact JS, Python and curl for what you just did. |
-| 📚 **Docs in English and Hausa** | Because a Nigerian language toolkit documented only in English is missing the point.                                                    |
+| 📚 **Docs in English and Hausa** | VitePress site in [`docs/`](./docs/). Hausa overview and quickstart are drafts and say so until a native speaker reviews them.          |
 
 ### Principles
 
@@ -90,10 +90,30 @@ Same API in Python. Same API in the browser. Same API on the edge.
 
 ---
 
+## Start here
+
+|                |                                                                                                                                       |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Docs           | [`docs/`](./docs/) — `pnpm --filter @n-atlas/docs build` writes a static site to `docs/.vitepress/dist`                               |
+| JavaScript SDK | [`packages/js-sdk`](./packages/js-sdk/) — npm name `n-atlas`                                                                          |
+| Python SDK     | [`packages/python-sdk`](./packages/python-sdk/) — import name `natlas`                                                                |
+| Examples       | [`examples/`](./examples/) — voice-note translator and a support-reply helper, plus short scripts                                     |
+| Playground     | [`apps/playground`](./apps/playground/) — browser UI, built on its own track                                                          |
+| Gateway        | [`serve/`](./serve/) — self-host with Modal or Docker Compose                                                                         |
+| Live health    | <https://kambah123--natlas-serve-natlasservice-serve.modal.run/health> (no API key; scales to zero, so a cold start can take minutes) |
+
+Chat and transcription on that host need `NATLAS_API_KEY`, a Bearer key from
+the Modal secret `natlas-api`. The key is not in this repository. A ten-minute
+path, once you have it, is the [docs quickstart](./docs/src/quickstart.md) or
+[`examples/voice-note-translator`](./examples/voice-note-translator/).
+
+---
+
 ## Status
 
-**The gateway and both client SDKs are built.** The playground, docs site, CLI,
-and local `transformers` backend are not.
+**The gateway, both client SDKs, the docs site, and two example apps are in
+the tree.** The playground, the Python CLI, and the local `transformers`
+backend are not.
 
 [`serve/`](./serve/) puts N-ATLaS and all four ASR models behind one
 OpenAI-compatible base URL (`docker compose up` or `modal deploy`).
@@ -125,7 +145,7 @@ SDK tests mock HTTP. Nothing in this repo was run against a real GPU.
 - [x] Retries with exponential backoff, timeouts, `AbortSignal`
 - [ ] Native-speaker review of the helper prompts (they are English instructions that name the target language)
 - [x] Backend adapters in separate files: `openai-compatible`, `hf-endpoint`. `official` throws until an NCAIR API exists
-- [x] Node 18+ and modern browsers via `fetch`; ESM + CJS via tsup
+- [x] Node 20+ and modern browsers via `fetch`; ESM + CJS via tsup. Node 18 is EOL and is not supported: global `File` (used when reading a transcription upload back out of `FormData`) arrived in Node 20, and the Node 18 CI job failed with `ReferenceError: File is not defined`
 
 #### `packages/python-sdk` — PyPI `natlas`
 
@@ -161,17 +181,18 @@ SDK tests mock HTTP. Nothing in this repo was run against a real GPU.
 
 #### `docs/` — English + Hausa
 
-- [ ] Introduction, Quickstart (JS / Python / curl), Self-hosting, SDK reference, Speech-to-text, Examples, Fine-tuning pointers, FAQ
-- [ ] **N-ATLAS Integration** — exactly how each component uses the model, with a mermaid diagram
-- [ ] **Architecture** — system diagram, data flow, key handling, no-content-logging guarantee
-- [ ] Language switcher; Hausa flagged for native-speaker review
+- [x] Overview, quickstart (JS / Python / curl), gateway API, both SDK references, self-hosting, limits, licensing
+- [x] **N-ATLAS integration** — how chat and speech reach `NCAIR1/N-ATLaS` and the four ASR repos, including a Mermaid diagram of the data flow
+- [x] Key handling and the no-content-logging guarantee, on the integration and gateway pages
+- [x] Language switcher. Hausa overview and quickstart are flagged for native-speaker review and are not described as reviewed
+- [ ] Fine-tuning guide and a full Hausa translation of every page
 
 #### `examples/`
 
 - [x] `examples/js` and `examples/python` — chat, streaming chat, and transcription against a gateway you already run
-- [ ] `hausa-chatbot-cli` (Python)
-- [ ] `whatsapp-voice-note-transcriber` (Node) — `.ogg` → Hausa transcript → English
-- [ ] `yoruba-summarizer` (JS)
+- [x] `examples/voice-note-translator` — audio in Hausa, Igbo, Yorùbá, or Nigerian English → transcript → translation or reply. CLI and a local page
+- [x] `examples/support-reply` — draft a support reply in the customer's language via N-ATLaS
+- [ ] `yoruba-summarizer` as its own app (the SDK `summarize` helper already exists)
 - [ ] `nextjs-chat-starter` — clone-and-go template
 - [ ] `colab-notebook`
 
@@ -262,8 +283,8 @@ Authoritative text: the Terms of Use section on each Hugging Face model card.
 
 ## Local development
 
-Requires **Node ≥ 18.17**, **pnpm 9**, **Python ≥ 3.10** and **ffmpeg** (for the
-speech pieces).
+Requires **Node ≥ 20**, **pnpm 9**, **Python ≥ 3.10** and **ffmpeg** (for the
+speech pieces). Node 18 is end-of-life and is not in CI.
 
 ```bash
 git clone https://github.com/Kambah123/N-ATLAS-Kit.git
