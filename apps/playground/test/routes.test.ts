@@ -105,6 +105,23 @@ describe('POST /api/chat', () => {
     expect(seen[0]?.body).toContain('"language":"ha"');
   });
 
+  it('clamps a temperature above 1 before calling the gateway', async () => {
+    const seen: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((_url: string, init: RequestInit) => {
+        seen.push(typeof init.body === 'string' ? init.body : '');
+        return Response.json({ choices: [{ message: { content: 'Sannu' } }] });
+      }),
+    );
+    const response = await chat(
+      jsonRequest({ ...chatBody(), temperature: 1.5, stream: false }, '203.0.113.24'),
+    );
+    expect(response.status).toBe(200);
+    const forwarded = JSON.parse(seen[0] ?? '{}') as { temperature: number };
+    expect(forwarded.temperature).toBe(1);
+  });
+
   it('follows a 303 and does not forward the API key off-origin', async () => {
     const seen: { url: string; authorization: string | null; method: string }[] = [];
     vi.stubGlobal(

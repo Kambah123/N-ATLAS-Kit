@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { chatLanguageOption } from '@/lib/languages';
-import { MAX_MESSAGE_CHARS } from '@/lib/limits';
+import { DEFAULT_MAX_TOKENS, DEFAULT_TEMPERATURE, MAX_MESSAGE_CHARS } from '@/lib/limits';
 import { deltaFromEvent, errorMessage, messageFromCompletion, takeSseData } from '@/lib/sse';
 import { LLM_MODEL_ID, type ChatLanguage, type ChatRequestBody } from '@/lib/types';
 import { type LastAction } from '@/components/types';
@@ -23,8 +23,8 @@ export function useChat({ configured, onAction }: UseChatOptions) {
   const [messages, setMessages] = useState<VisibleMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [language, setLanguage] = useState<ChatLanguage>('en');
-  const [temperature, setTemperature] = useState(0.7);
-  const [maxTokens, setMaxTokens] = useState(512);
+  const [temperature, setTemperature] = useState(DEFAULT_TEMPERATURE);
+  const [maxTokens, setMaxTokens] = useState(DEFAULT_MAX_TOKENS);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busyRef = useRef(false);

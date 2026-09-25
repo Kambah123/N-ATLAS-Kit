@@ -1,4 +1,6 @@
 import {
+  DEFAULT_MAX_TOKENS,
+  DEFAULT_TEMPERATURE,
   MAX_JSON_BYTES,
   MAX_MAX_TOKENS,
   MAX_MESSAGE_CHARS,
@@ -73,18 +75,15 @@ export function validateChatRequest(input: unknown, rawBytes: number): Validatio
     return { ok: false, message: `This playground only calls ${LLM_MODEL_ID}.` };
   }
 
-  const temperature = typeof input.temperature === 'number' ? input.temperature : 0.7;
-  const maxTokens = typeof input.max_tokens === 'number' ? input.max_tokens : 512;
-  if (
-    !Number.isFinite(temperature) ||
-    temperature < MIN_TEMPERATURE ||
-    temperature > MAX_TEMPERATURE
-  ) {
+  let temperature = typeof input.temperature === 'number' ? input.temperature : DEFAULT_TEMPERATURE;
+  const maxTokens = typeof input.max_tokens === 'number' ? input.max_tokens : DEFAULT_MAX_TOKENS;
+  if (!Number.isFinite(temperature) || temperature < MIN_TEMPERATURE) {
     return {
       ok: false,
-      message: `Temperature must be between ${MIN_TEMPERATURE} and ${MAX_TEMPERATURE}.`,
+      message: `Temperature must be at least ${MIN_TEMPERATURE}.`,
     };
   }
+  if (temperature > MAX_TEMPERATURE) temperature = MAX_TEMPERATURE;
   if (!Number.isInteger(maxTokens) || maxTokens < MIN_MAX_TOKENS || maxTokens > MAX_MAX_TOKENS) {
     return {
       ok: false,

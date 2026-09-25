@@ -23,6 +23,10 @@
   --user-ink: #f4fff8;
   --shadow: 0 18px 50px rgba(23, 40, 32, 0.08);
   --ring: #0e6b45;
+  --code-bg: #fffdf8;
+  --code-ink: #15211c;
+  --code-muted: #5c675f;
+  --code-line: #e0d6c6;
 }
 
 .dark {
@@ -44,8 +48,12 @@
   --danger-bg: #3a1818;
   --user: #135c3c;
   --user-ink: #f3efe4;
-  --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   --ring: #3dbe7a;
+  --code-bg: #0c1914;
+  --code-ink: #f3efe4;
+  --code-muted: #b7c3b9;
+  --code-line: #24362e;
 }
 
 html,
@@ -55,24 +63,17 @@ body {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(
-      1000px 420px at 0% -10%,
-      color-mix(in srgb, var(--accent) 16%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
-      800px 380px at 100% 0%,
-      color-mix(in srgb, var(--gold-line) 20%, transparent),
-      transparent 50%
-    ),
-    var(--bg);
+  background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 30%, white);
+  background: color-mix(in srgb, var(--accent) 28%, white);
+}
+
+.header-control:focus-visible {
+  outline-color: var(--gold-line);
 }
 
 :focus-visible {
@@ -80,9 +81,8 @@ body {
   outline-offset: 2px;
 }
 
-.font-display {
-  font-family: var(--font-fraunces), Georgia, 'Times New Roman', serif;
-  font-optical-sizing: auto;
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /* Author styles would otherwise beat the browser rule that hides this. */
@@ -102,7 +102,7 @@ input[type='range'] {
     transform: scale(1);
   }
   50% {
-    opacity: 0.4;
+    opacity: 0.45;
     transform: scale(0.82);
   }
 }
@@ -111,8 +111,38 @@ input[type='range'] {
   animation: pulse-dot 1.4s ease-in-out infinite;
 }
 
+@keyframes wave-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.wave-bar {
+  transform-origin: center;
+  animation: wave-bar 0.9s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-60%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+.progress-slide {
+  animation: progress-slide 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pulse-dot {
+  .pulse-dot,
+  .wave-bar,
+  .progress-slide {
     animation: none;
   }
 }

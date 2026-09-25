@@ -2,13 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { type LastAction } from '@/components/types';
+import { WakingCard } from '@/components/waking-card';
 import { useSlow } from '@/components/use-slow';
-import {
-  ASR_LANGUAGE_OPTIONS,
-  PRIVACY_NOTE,
-  TRANSLATE_SYSTEM,
-  WAKING_MESSAGE,
-} from '@/lib/languages';
+import { ASR_LANGUAGE_OPTIONS, PRIVACY_NOTE, TRANSLATE_SYSTEM } from '@/lib/languages';
 import { MAX_AUDIO_BYTES, MAX_AUDIO_SECONDS } from '@/lib/limits';
 import { errorMessage, messageFromCompletion } from '@/lib/sse';
 import { LLM_MODEL_ID, type AsrLanguage, type ChatRequestBody } from '@/lib/types';
@@ -19,6 +15,7 @@ type SpeechPanelProps = {
   onAction: (action: LastAction) => void;
   onBusy: (busy: boolean) => void;
   replyDisabled: boolean;
+  uploadRequest?: number;
 };
 
 export function SpeechPanel({
@@ -27,6 +24,7 @@ export function SpeechPanel({
   onAction,
   onBusy,
   replyDisabled,
+  uploadRequest = 0,
 }: SpeechPanelProps) {
   const [language, setLanguage] = useState<AsrLanguage>('ha');
   const [busy, setBusy] = useState(false);
@@ -54,6 +52,11 @@ export function SpeechPanel({
       if (timerRef.current !== null) window.clearInterval(timerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (uploadRequest < 1) return;
+    fileInputRef.current?.click();
+  }, [uploadRequest]);
 
   async function submitFile(file: File) {
     if (!configured) {
@@ -179,158 +182,184 @@ export function SpeechPanel({
     }
   }
 
+  const model = ASR_LANGUAGE_OPTIONS.find((option) => option.id === language)?.model;
+
   return (
-    <section
-      className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-5 sm:px-6"
-      aria-label="Speech"
-    >
-      <p className="text-xs font-medium tracking-[0.16em] text-[var(--gold)] uppercase">Speech</p>
-      <h2 className="font-display mt-2 text-3xl">Four voices, one transcript.</h2>
-      <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--muted)]">
-        Record from the mic or upload a WhatsApp voice note. Each language uses its own NCAIR1
-        Whisper model. Pidgin and Nigerian English share the English model.
-      </p>
-
-      <div className="mt-5" role="radiogroup" aria-label="Transcription language">
-        <div className="flex flex-wrap gap-2">
-          {ASR_LANGUAGE_OPTIONS.map((option) => {
-            const active = option.id === language;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                onClick={() => setLanguage(option.id)}
-                className={`rounded-full px-3 py-1.5 text-sm ${
-                  active
-                    ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
-                    : 'bg-[var(--bg-sunken)] text-[var(--ink)]'
-                }`}
-              >
-                {option.label}
-              </button>
-            );
-          })}
+    <section className="min-h-0 flex-1 overflow-y-auto px-4 py-4" aria-label="Speech">
+      <div className="mx-auto flex max-w-xl flex-col gap-4">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Speech</h2>
+          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+            Record or upload a voice note. Each language uses its own NCAIR1 model. Pidgin shares
+            the Nigerian English model.
+          </p>
         </div>
-        <p className="mt-2 text-xs text-[var(--muted)]">
-          {ASR_LANGUAGE_OPTIONS.find((option) => option.id === language)?.model}
-        </p>
-      </div>
 
-      <div
-        className={`mt-5 rounded-3xl border border-dashed px-4 py-8 text-center ${
-          dragOver
-            ? 'border-[var(--accent)] bg-[var(--bg-sunken)]'
-            : 'border-[var(--line)] bg-[var(--bg-elev)]'
-        }`}
-        onDragOver={(event) => {
-          event.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(event) => {
-          event.preventDefault();
-          setDragOver(false);
-          const file = event.dataTransfer.files[0];
-          if (file) void submitFile(file);
-        }}
-      >
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => void toggleRecording()}
-            disabled={busy}
-            className="rounded-2xl bg-[var(--header)] px-4 py-3 text-sm font-medium text-[var(--header-ink)] disabled:opacity-50"
+        <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] p-4 shadow-[var(--shadow)]">
+          <div
+            role="radiogroup"
+            aria-label="Transcription language"
+            className="flex flex-wrap gap-2"
           >
-            {recording ? `Stop · ${formatTime(elapsed)}` : 'Record'}
-          </button>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={busy || recording}
-            className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 py-3 text-sm font-medium disabled:opacity-50"
-          >
-            Upload audio
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".ogg,.mp3,.m4a,.wav,.webm,audio/*"
-            className="sr-only"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.target.value = '';
+            {ASR_LANGUAGE_OPTIONS.map((option) => {
+              const active = option.id === language;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setLanguage(option.id)}
+                  className={`rounded-full px-3 py-1.5 text-sm ${
+                    active
+                      ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
+                      : 'border border-[var(--line)] bg-[var(--bg)] text-[var(--ink)]'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 font-mono text-[11px] text-[var(--muted)]">{model}</p>
+
+          <div
+            className={`mt-4 rounded-2xl border border-dashed px-4 py-6 text-center ${
+              dragOver ? 'border-[var(--accent)] bg-[var(--bg-sunken)]' : 'border-[var(--line)]'
+            }`}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(event) => {
+              event.preventDefault();
+              setDragOver(false);
+              const file = event.dataTransfer.files[0];
               if (file) void submitFile(file);
             }}
-          />
-        </div>
-        <p className="mt-3 text-xs text-[var(--muted)]">
-          .ogg, .mp3, .m4a, .wav — up to 2 minutes and 8 MB.
-        </p>
-      </div>
-
-      {slow ? (
-        <p className="mt-4 text-sm text-[var(--gold)]" role="status">
-          {WAKING_MESSAGE}
-        </p>
-      ) : null}
-      {busy ? (
-        <p className="mt-4 text-sm text-[var(--muted)]" role="status">
-          Transcribing…
-        </p>
-      ) : null}
-      {error ? (
-        <p
-          className="mt-4 rounded-xl bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger)]"
-          role="alert"
-        >
-          {error}
-        </p>
-      ) : null}
-
-      {transcript ? (
-        <div className="mt-5 rounded-3xl border border-[var(--line)] bg-[var(--bg-elev)] p-4 shadow-[var(--shadow)]">
-          <p className="text-xs font-medium tracking-wide text-[var(--muted)] uppercase">
-            Transcript{filename ? ` · ${filename}` : ''}
-          </p>
-          <p className="mt-2 text-sm leading-6 whitespace-pre-wrap">{transcript}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={replyDisabled || busy}
-              onClick={() => onReply(transcript)}
-              className="rounded-2xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-ink)] disabled:opacity-50"
-            >
-              Reply to this
-            </button>
-            <button
-              type="button"
-              disabled={translating || busy}
-              onClick={() => void translate()}
-              className="rounded-2xl border border-[var(--line)] px-4 py-2 text-sm font-medium disabled:opacity-50"
-            >
-              {translating ? 'Translating…' : 'Translate to English'}
-            </button>
-            <button
-              type="button"
-              onClick={() => void navigator.clipboard.writeText(transcript)}
-              className="rounded-2xl border border-[var(--line)] px-4 py-2 text-sm font-medium"
-            >
-              Copy
-            </button>
+          >
+            {recording ? (
+              <div className="mb-4 flex h-8 items-end justify-center gap-1" aria-hidden>
+                {Array.from({ length: 12 }, (_, index) => (
+                  <span
+                    key={index}
+                    className="wave-bar h-7 w-1 rounded-full bg-[var(--accent)]"
+                    style={{ animationDelay: `${index * 0.08}s` }}
+                  />
+                ))}
+              </div>
+            ) : null}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => void toggleRecording()}
+                disabled={busy}
+                className="rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-medium text-[var(--accent-ink)] disabled:opacity-50"
+              >
+                {recording ? `Stop · ${formatTime(elapsed)}` : 'Record'}
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={busy || recording}
+                className="rounded-xl border border-[var(--line)] bg-[var(--bg)] px-4 py-2.5 text-sm font-medium disabled:opacity-50"
+              >
+                Upload audio
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".ogg,.mp3,.m4a,.wav,.webm,audio/*"
+                className="sr-only"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = '';
+                  if (file) void submitFile(file);
+                }}
+              />
+            </div>
+            <p className="mt-3 text-xs text-[var(--muted)]">
+              .ogg, .mp3, .m4a, .wav — up to 2 minutes and 8 MB.
+            </p>
           </div>
-          {translation ? (
-            <div className="mt-4 border-t border-[var(--line)] pt-4">
-              <p className="text-xs font-medium tracking-wide text-[var(--muted)] uppercase">
-                English
-              </p>
-              <p className="mt-2 text-sm leading-6 whitespace-pre-wrap">{translation}</p>
+
+          {recording ? (
+            <p className="mt-3 text-center text-xs text-[var(--muted)]" role="status">
+              Recording {formatTime(elapsed)} of 2:00
+            </p>
+          ) : null}
+          {busy ? (
+            <div className="mt-4" role="status">
+              <p className="text-sm text-[var(--ink)]">Transcribing…</p>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--bg-sunken)]">
+                <div className="progress-slide h-full w-1/3 rounded-full bg-[var(--accent)]" />
+              </div>
             </div>
           ) : null}
+          {slow ? (
+            <div className="mt-4">
+              <WakingCard />
+            </div>
+          ) : null}
+          {error ? (
+            <p
+              className="mt-4 rounded-xl bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger)]"
+              role="alert"
+            >
+              {error}
+            </p>
+          ) : null}
+          {!transcript && !busy && !recording && !error ? (
+            <p className="mt-4 text-center text-sm text-[var(--muted)]">
+              A transcript will show up here. It is not stored.
+            </p>
+          ) : null}
         </div>
-      ) : null}
-      <p className="mt-4 text-xs text-[var(--muted)]">{PRIVACY_NOTE}</p>
+
+        {transcript ? (
+          <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] p-4 shadow-[var(--shadow)]">
+            <p className="text-xs font-medium tracking-wide text-[var(--muted)] uppercase">
+              Transcript{filename ? ` · ${filename}` : ''}
+            </p>
+            <p className="mt-2 text-sm leading-6 whitespace-pre-wrap">{transcript}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={replyDisabled || busy}
+                onClick={() => onReply(transcript)}
+                className="rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-ink)] disabled:opacity-50"
+              >
+                Reply to this
+              </button>
+              <button
+                type="button"
+                disabled={translating || busy}
+                onClick={() => void translate()}
+                className="rounded-xl border border-[var(--gold-line)] px-4 py-2 text-sm font-medium text-[var(--gold)] disabled:opacity-50"
+              >
+                {translating ? 'Translating…' : 'Translate to English'}
+              </button>
+              <button
+                type="button"
+                onClick={() => void navigator.clipboard.writeText(transcript)}
+                className="rounded-xl border border-[var(--line)] px-4 py-2 text-sm font-medium"
+              >
+                Copy
+              </button>
+            </div>
+            {translation ? (
+              <div className="mt-4 border-t border-[var(--line)] pt-4">
+                <p className="text-xs font-medium tracking-wide text-[var(--muted)] uppercase">
+                  English
+                </p>
+                <p className="mt-2 text-sm leading-6 whitespace-pre-wrap">{translation}</p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        <p className="text-xs text-[var(--muted)]">{PRIVACY_NOTE}</p>
+      </div>
     </section>
   );
 }

@@ -31,6 +31,78 @@ describe('validateChatRequest', () => {
     expect(result.ok).toBe(false);
   });
 
+  it('clamps a temperature above 1 and keeps a moderate one', () => {
+    const high = validateChatRequest(
+      {
+        messages: [{ role: 'user', content: 'tuwo fa' }],
+        language: 'ha',
+        temperature: 1.5,
+        max_tokens: 512,
+      },
+      80,
+    );
+    expect(high.ok).toBe(true);
+    if (!high.ok) return;
+    expect(high.body.temperature).toBe(1);
+
+    const extreme = validateChatRequest(
+      {
+        messages: [{ role: 'user', content: 'tuwo fa' }],
+        language: 'ha',
+        temperature: 100,
+      },
+      80,
+    );
+    expect(extreme.ok).toBe(true);
+    if (!extreme.ok) return;
+    expect(extreme.body.temperature).toBe(1);
+
+    const moderate = validateChatRequest(
+      {
+        messages: [{ role: 'user', content: 'tuwo fa' }],
+        language: 'ha',
+        temperature: 0.4,
+      },
+      80,
+    );
+    expect(moderate.ok).toBe(true);
+    if (!moderate.ok) return;
+    expect(moderate.body.temperature).toBe(0.4);
+  });
+
+  it('defaults temperature to 0.6 and rejects a negative temperature', () => {
+    const missing = validateChatRequest(
+      { messages: [{ role: 'user', content: 'Hi' }], language: 'en' },
+      40,
+    );
+    expect(missing.ok).toBe(true);
+    if (!missing.ok) return;
+    expect(missing.body.temperature).toBe(0.6);
+    expect(missing.body.max_tokens).toBe(512);
+
+    const negative = validateChatRequest(
+      {
+        messages: [{ role: 'user', content: 'Hi' }],
+        language: 'en',
+        temperature: -0.2,
+      },
+      40,
+    );
+    expect(negative.ok).toBe(false);
+  });
+
+  it('rejects max tokens above 1024', () => {
+    const result = validateChatRequest(
+      {
+        messages: [{ role: 'user', content: 'Hi' }],
+        language: 'en',
+        max_tokens: 2000,
+      },
+      40,
+    );
+    expect(result.ok).toBe(false);
+  });
+
   it('rejects an empty conversation and an oversized message', () => {
     expect(validateChatRequest({ messages: [] }, 20).ok).toBe(false);
     const huge = {

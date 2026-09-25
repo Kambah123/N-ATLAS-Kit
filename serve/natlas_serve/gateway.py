@@ -19,12 +19,18 @@ know this exists.
 **``language`` passthrough.** Our SDKs send a non-standard ``language`` field so
 we can report usage per language. vLLM would reject the unknown key, so the
 gateway strips it from the body and keeps it only for the log line.
+
+**Sampling bounds.** Temperatures above 1.0 make N-ATLaS degenerate into
+random multilingual text. Those values are clamped to 1.0. When the caller
+omits them, ``top_p`` defaults to 0.9 and ``repetition_penalty`` to 1.1.
+Caller-supplied values are left unchanged.
 """
 
 from __future__ import annotations
 
 import hmac
 import json
+import math
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -57,6 +63,24 @@ ATTRIBUTION = (
 #: Give up trying to parse usage out of a stream if a single SSE line gets
 #: absurd. Protects the gateway from unbounded buffering.
 _MAX_SSE_LINE = 1 << 20
+
+#: Above this, nucleus sampling on N-ATLaS collapses into word soup.
+MAX_CHAT_TEMPERATURE = 1.0
+DEFAULT_TOP_P = 0.9
+DEFAULT_REPETITION_PENALTY = 1.1
+
+
+def clamp_temperature(value: Any) -> Any:
+    """Clamp a numeric temperature above 1.0. Leave anything else untouched.
+
+    ``bool`` is an ``int`` in Python, so it is excluded on purpose.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return value
+    number = float(value)
+    if not math.isfinite(number) or number <= MAX_CHAT_TEMPERATURE:
+        return value
+    return MAX_CHAT_TEMPERATURE
 
 
 def today_date_string(now: datetime | None = None) -> str:
@@ -107,6 +131,11 @@ def prepare_chat_body(
         options = dict(prepared.get("stream_options") or {})
         options.setdefault("include_usage", True)
         prepared["stream_options"] = options
+
+    if "temperature" in prepared:
+        prepared["temperature"] = clamp_temperature(prepared["temperature"])
+    prepared.setdefault("top_p", DEFAULT_TOP_P)
+    prepared.setdefault("repetition_penalty", DEFAULT_REPETITION_PENALTY)
 
     return prepared, language
 

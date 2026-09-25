@@ -193,6 +193,40 @@ def test_non_streaming_requests_do_not_get_stream_options(settings: Settings) ->
     assert "stream_options" not in body
 
 
+def test_temperature_above_one_is_clamped(settings: Settings) -> None:
+    high, _ = gateway.prepare_chat_body({"messages": [], "temperature": 1.5}, settings)
+    assert high["temperature"] == 1.0
+    extreme, _ = gateway.prepare_chat_body({"messages": [], "temperature": 100}, settings)
+    assert extreme["temperature"] == 1.0
+
+
+def test_temperature_at_or_below_one_is_unchanged(settings: Settings) -> None:
+    body, _ = gateway.prepare_chat_body({"messages": [], "temperature": 0.4}, settings)
+    assert body["temperature"] == 0.4
+    at_cap, _ = gateway.prepare_chat_body({"messages": [], "temperature": 1}, settings)
+    assert at_cap["temperature"] == 1
+
+
+def test_non_numeric_temperature_is_left_alone(settings: Settings) -> None:
+    body, _ = gateway.prepare_chat_body({"messages": [], "temperature": True}, settings)
+    assert body["temperature"] is True
+
+
+def test_sampling_defaults_fill_in_when_missing(settings: Settings) -> None:
+    body, _ = gateway.prepare_chat_body({"messages": []}, settings)
+    assert "temperature" not in body
+    assert body["top_p"] == 0.9
+    assert body["repetition_penalty"] == 1.1
+
+
+def test_caller_sampling_values_are_kept(settings: Settings) -> None:
+    body, _ = gateway.prepare_chat_body(
+        {"messages": [], "top_p": 0.5, "repetition_penalty": 1.3}, settings
+    )
+    assert body["top_p"] == 0.5
+    assert body["repetition_penalty"] == 1.3
+
+
 # ---------------------------------------------------------------------------
 # Proxying
 # ---------------------------------------------------------------------------

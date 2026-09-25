@@ -1,17 +1,17 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Outfit } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css';
 
-const outfit = Outfit({
+const sans = Inter({
   subsets: ['latin', 'latin-ext'],
-  variable: '--font-outfit',
+  variable: '--font-sans',
   display: 'swap',
 });
 
-const fraunces = Fraunces({
+const mono = JetBrains_Mono({
   subsets: ['latin', 'latin-ext'],
-  variable: '--font-fraunces',
+  variable: '--font-mono',
   display: 'swap',
 });
 
@@ -25,16 +25,16 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#073326' },
-    { media: '(prefers-color-scheme: dark)', color: '#04140f' },
+    { media: '(prefers-color-scheme: light)', color: '#f3efe4' },
+    { media: '(prefers-color-scheme: dark)', color: '#081410' },
   ],
 };
 
-const themeScript = `(function(){try{var t=localStorage.getItem('natlas-theme');var dark=t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',dark);}catch(e){}})();`;
+const themeScript = `(function(){try{var t=localStorage.getItem('natlas-theme');document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${fraunces.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
