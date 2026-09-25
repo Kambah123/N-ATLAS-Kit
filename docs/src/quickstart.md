@@ -30,6 +30,14 @@ either. `GET /health` is always on the host root, not under `/v1`.
 A Hausa draft of this page is at [Farawa](/ha/quickstart). It has not been
 reviewed by a native speaker.
 
+## Install
+
+```bash
+npm install n-atlas
+# or: pnpm add n-atlas
+pip install natlas
+```
+
 ## JavaScript
 
 Node.js 20 or newer. The package name is `n-atlas`.

@@ -35,6 +35,14 @@ export NATLAS_API_KEY=your-gateway-key
 `NATLAS_BASE_URL` na iya zama tushen URL, ko tushen tare da `/v1`. Dukkan SDKs
 suna karɓa. `GET /health` koyaushe yana kan tushen host, ba ƙarƙashin `/v1` ba.
 
+## Install
+
+```bash
+npm install n-atlas
+# or: pnpm add n-atlas
+pip install natlas
+```
+
 ## JavaScript
 
 Node.js 20 ko sabo. Sunan package shine `n-atlas`.

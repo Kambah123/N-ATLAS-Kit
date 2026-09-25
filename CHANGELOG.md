@@ -16,6 +16,12 @@ together from this file.
   examples use the published installs: `npm install n-atlas`, `pnpm add n-atlas`,
   and `pip install natlas`.
 
+### Fixed
+
+- Docs on Vercel serve VitePress clean URLs (`/quickstart`, `/ha/quickstart`,
+  and the rest). `docs/vercel.json` sets `cleanUrls` so a direct load is not a
+  404 while the `.html` file still exists.
+
 ## [0.1.0] - 2026-09-25
 
 First published release. [`n-atlas@0.1.0`](https://www.npmjs.com/package/n-atlas)
