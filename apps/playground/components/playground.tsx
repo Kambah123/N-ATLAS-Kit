@@ -74,6 +74,30 @@ export function Playground({ configured }: { configured: boolean }) {
     };
   }, [configured]);
 
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 768px)');
+    const apply = () => {
+      if (!query.matches) {
+        document.documentElement.style.removeProperty('--app-height');
+        return;
+      }
+      const height = window.visualViewport?.height ?? window.innerHeight;
+      document.documentElement.style.setProperty('--app-height', `${Math.round(height)}px`);
+    };
+    apply();
+    query.addEventListener('change', apply);
+    window.addEventListener('resize', apply);
+    window.visualViewport?.addEventListener('resize', apply);
+    window.visualViewport?.addEventListener('scroll', apply);
+    return () => {
+      query.removeEventListener('change', apply);
+      window.removeEventListener('resize', apply);
+      window.visualViewport?.removeEventListener('resize', apply);
+      window.visualViewport?.removeEventListener('scroll', apply);
+      document.documentElement.style.removeProperty('--app-height');
+    };
+  }, []);
+
   const shownHealth: HealthView =
     (chat.slow || speechSlow) && health.status !== 'ready'
       ? { status: 'waking', message: WAKING_MESSAGE }
@@ -97,190 +121,192 @@ export function Playground({ configured }: { configured: boolean }) {
   const codeBeside = tab !== 'code';
 
   return (
-    <div className="flex h-dvh max-w-full flex-col overflow-hidden bg-[var(--bg)] text-[var(--ink)]">
-      <header className="relative shrink-0 overflow-hidden border-b border-black/20 bg-[var(--header)] text-[var(--header-ink)]">
-        <svg
-          className="pointer-events-none absolute inset-0 h-full w-full text-[var(--gold-line)] opacity-30"
-          aria-hidden
-        >
-          <defs>
-            <pattern id="adire" width="28" height="28" patternUnits="userSpaceOnUse">
-              <path
-                d="M14 2 L26 14 L14 26 L2 14 Z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.7"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#adire)" />
-        </svg>
-        <div className="relative flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4">
-          <div className="flex shrink-0 items-center gap-2">
-            <Mark />
-            <div>
-              <h1 className="text-sm font-semibold tracking-tight text-[var(--header-ink)]">
-                N-ATLAS <span className="text-[var(--gold-line)]">Playground</span>
-              </h1>
-              <p className="font-mono text-[10px] text-[var(--header-muted)] md:hidden">
-                {LLM_MODEL_ID}
-              </p>
+    <div className="bg-[var(--bg)] text-[var(--ink)] max-[768px]:h-[var(--app-height,100dvh)] max-[768px]:overflow-y-auto min-[769px]:flex min-[769px]:h-dvh min-[769px]:max-w-full min-[769px]:flex-col min-[769px]:overflow-hidden">
+      <div className="flex max-w-full flex-col overflow-hidden max-[768px]:h-[var(--app-height,100dvh)] min-[769px]:min-h-0 min-[769px]:flex-1">
+        <header className="relative shrink-0 overflow-hidden border-b border-black/20 bg-[var(--header)] text-[var(--header-ink)]">
+          <svg
+            className="pointer-events-none absolute inset-0 h-full w-full text-[var(--gold-line)] opacity-30"
+            aria-hidden
+          >
+            <defs>
+              <pattern id="adire" width="28" height="28" patternUnits="userSpaceOnUse">
+                <path
+                  d="M14 2 L26 14 L14 26 L2 14 Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.7"
+                />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#adire)" />
+          </svg>
+          <div className="relative flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4">
+            <div className="flex shrink-0 items-center gap-2">
+              <Mark />
+              <div>
+                <h1 className="text-sm font-semibold tracking-tight text-[var(--header-ink)]">
+                  N-ATLAS <span className="text-[var(--gold-line)]">Playground</span>
+                </h1>
+                <p className="font-mono text-[10px] text-[var(--header-muted)] md:hidden">
+                  {LLM_MODEL_ID}
+                </p>
+              </div>
+            </div>
+            <p className="hidden rounded-full border border-white/15 bg-white/10 px-2.5 py-1 font-mono text-[11px] text-[var(--header-ink)] md:inline">
+              {LLM_MODEL_ID}
+            </p>
+            <StatusPill health={shownHealth} />
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <LanguageField language={chat.language} onLanguage={chat.setLanguage} />
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="header-control rounded-xl border border-white/20 p-2 text-[var(--header-ink)]"
+                aria-label="Toggle color theme"
+              >
+                <IconMoon className="h-4 w-4 dark:hidden" />
+                <IconSun className="hidden h-4 w-4 dark:block" />
+              </button>
+              <a
+                href={DOCS_HREF}
+                target="_blank"
+                rel="noreferrer"
+                className="header-control inline-flex items-center gap-1 rounded-xl border border-[var(--gold-line)] px-2.5 py-1.5 text-xs font-medium text-[var(--gold-line)]"
+              >
+                <IconDocs className="h-4 w-4" />
+                <span className="hidden sm:inline">Docs</span>
+              </a>
+              <button
+                type="button"
+                onClick={focusCode}
+                className="header-control rounded-xl bg-[var(--gold-line)] px-2.5 py-1.5 text-xs font-medium text-[var(--header)]"
+              >
+                <span className="sm:hidden">Code</span>
+                <span className="hidden sm:inline">Get API code</span>
+              </button>
             </div>
           </div>
-          <p className="hidden rounded-full border border-white/15 bg-white/10 px-2.5 py-1 font-mono text-[11px] text-[var(--header-ink)] md:inline">
-            {LLM_MODEL_ID}
-          </p>
-          <StatusPill health={shownHealth} />
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <LanguageField language={chat.language} onLanguage={chat.setLanguage} />
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="header-control rounded-xl border border-white/20 p-2 text-[var(--header-ink)]"
-              aria-label="Toggle color theme"
-            >
-              <IconMoon className="h-4 w-4 dark:hidden" />
-              <IconSun className="hidden h-4 w-4 dark:block" />
-            </button>
-            <a
-              href={DOCS_HREF}
-              target="_blank"
-              rel="noreferrer"
-              className="header-control inline-flex items-center gap-1 rounded-xl border border-[var(--gold-line)] px-2.5 py-1.5 text-xs font-medium text-[var(--gold-line)]"
-            >
-              <IconDocs className="h-4 w-4" />
-              <span className="hidden sm:inline">Docs</span>
-            </a>
-            <button
-              type="button"
-              onClick={focusCode}
-              className="header-control rounded-xl bg-[var(--gold-line)] px-2.5 py-1.5 text-xs font-medium text-[var(--header)]"
-            >
-              <span className="sm:hidden">Code</span>
-              <span className="hidden sm:inline">Get API code</span>
-            </button>
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="flex min-h-0 flex-1">
-        <nav
-          className="hidden w-14 shrink-0 flex-col items-center gap-1 border-r border-[var(--line)] bg-[var(--bg-elev)] py-2 lg:flex"
-          aria-label="Playground"
-        >
-          {TABS.map((item) => {
-            const Icon = item.icon;
-            const active = tab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                title={item.label}
-                aria-label={item.label}
-                aria-current={active ? 'page' : undefined}
-                onClick={() => (item.id === 'code' ? focusCode() : setTab(item.id))}
-                className={`rounded-xl p-2.5 ${
-                  active
-                    ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
-                    : 'text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]'
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-              </button>
-            );
-          })}
-          <div className="mt-auto flex flex-col items-center gap-1">
-            <a
-              href={DOCS_HREF}
-              target="_blank"
-              rel="noreferrer"
-              title="Docs"
-              aria-label="Docs"
-              className="rounded-xl p-2.5 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
-            >
-              <IconDocs className="h-5 w-5" />
-            </a>
-            <a
-              href={GITHUB_HREF}
-              target="_blank"
-              rel="noreferrer"
-              title="GitHub"
-              aria-label="GitHub"
-              className="rounded-xl p-2.5 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
-            >
-              <IconGitHub className="h-5 w-5" />
-            </a>
-            <a
-              href={X_HREF}
-              target="_blank"
-              rel="noopener"
-              title="X @0xSkamber"
-              aria-label="X @0xSkamber"
-              className="rounded-xl p-2.5 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
-            >
-              <IconX className="h-5 w-5" />
-            </a>
-          </div>
-        </nav>
-
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1">
           <nav
-            className="flex shrink-0 gap-1 border-b border-[var(--line)] bg-[var(--bg-elev)] px-2 py-1.5 lg:hidden"
+            className="hidden w-14 shrink-0 flex-col items-center gap-1 border-r border-[var(--line)] bg-[var(--bg-elev)] py-2 lg:flex"
             aria-label="Playground"
           >
-            {TABS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setTab(item.id)}
-                className={`flex-1 rounded-xl px-2 py-2 text-xs font-medium sm:text-sm ${
-                  tab === item.id
-                    ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
-                    : 'text-[var(--muted)]'
-                }`}
-                aria-current={tab === item.id ? 'page' : undefined}
+            {TABS.map((item) => {
+              const Icon = item.icon;
+              const active = tab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  title={item.label}
+                  aria-label={item.label}
+                  aria-current={active ? 'page' : undefined}
+                  onClick={() => (item.id === 'code' ? focusCode() : setTab(item.id))}
+                  className={`rounded-xl p-2.5 ${
+                    active
+                      ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
+                      : 'text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                </button>
+              );
+            })}
+            <div className="mt-auto flex flex-col items-center gap-1">
+              <a
+                href={DOCS_HREF}
+                target="_blank"
+                rel="noreferrer"
+                title="Docs"
+                aria-label="Docs"
+                className="rounded-xl p-2.5 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
               >
-                {item.label}
-              </button>
-            ))}
+                <IconDocs className="h-5 w-5" />
+              </a>
+              <a
+                href={GITHUB_HREF}
+                target="_blank"
+                rel="noreferrer"
+                title="GitHub"
+                aria-label="GitHub"
+                className="rounded-xl p-2.5 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
+              >
+                <IconGitHub className="h-5 w-5" />
+              </a>
+              <a
+                href={X_HREF}
+                target="_blank"
+                rel="noopener"
+                title="X @0xSkamber"
+                aria-label="X @0xSkamber"
+                className="rounded-xl p-2.5 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
+              >
+                <IconX className="h-5 w-5" />
+              </a>
+            </div>
           </nav>
 
-          <div className="flex min-h-0 flex-1 gap-2 p-2 sm:gap-3 sm:p-3">
-            <div
-              className={`${
-                tab === 'chat' ? 'flex' : 'hidden'
-              } min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] shadow-[var(--shadow)]`}
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <nav
+              className="flex shrink-0 gap-1 border-b border-[var(--line)] bg-[var(--bg-elev)] px-2 py-1.5 lg:hidden"
+              aria-label="Playground"
             >
-              <ChatPanel
-                chat={chat}
-                configured={configured}
-                onOpenSpeech={openSpeech}
-                onAttachAudio={attachAudio}
-              />
-            </div>
-            <div
-              className={`${
-                tab === 'speech' ? 'flex' : 'hidden'
-              } min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] shadow-[var(--shadow)]`}
-            >
-              <SpeechPanel
-                configured={configured}
-                onReply={(text, audioLanguage) => {
-                  setTab('chat');
-                  void chat.send(text, { language: audioLanguage, fromTranscript: true });
-                }}
-                onAction={onAction}
-                onBusy={setSpeechBusy}
-                replyDisabled={chat.busy}
-                uploadRequest={uploadRequest}
-              />
-            </div>
-            <div
-              className={`${tab === 'code' ? 'flex' : 'hidden'} ${
-                codeBeside ? 'xl:flex xl:w-[min(46%,34rem)] xl:flex-none' : 'xl:flex'
-              } min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] shadow-[var(--shadow)]`}
-            >
-              <CodePanel action={action} />
+              {TABS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setTab(item.id)}
+                  className={`flex-1 rounded-xl px-2 py-2 text-xs font-medium sm:text-sm ${
+                    tab === item.id
+                      ? 'bg-[var(--accent)] text-[var(--accent-ink)]'
+                      : 'text-[var(--muted)]'
+                  }`}
+                  aria-current={tab === item.id ? 'page' : undefined}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+
+            <div className="flex min-h-0 flex-1 gap-2 p-2 sm:gap-3 sm:p-3">
+              <div
+                className={`${
+                  tab === 'chat' ? 'flex' : 'hidden'
+                } min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] shadow-[var(--shadow)]`}
+              >
+                <ChatPanel
+                  chat={chat}
+                  configured={configured}
+                  onOpenSpeech={openSpeech}
+                  onAttachAudio={attachAudio}
+                />
+              </div>
+              <div
+                className={`${
+                  tab === 'speech' ? 'flex' : 'hidden'
+                } min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] shadow-[var(--shadow)]`}
+              >
+                <SpeechPanel
+                  configured={configured}
+                  onReply={(text, audioLanguage) => {
+                    setTab('chat');
+                    void chat.send(text, { language: audioLanguage, fromTranscript: true });
+                  }}
+                  onAction={onAction}
+                  onBusy={setSpeechBusy}
+                  replyDisabled={chat.busy}
+                  uploadRequest={uploadRequest}
+                />
+              </div>
+              <div
+                className={`${tab === 'code' ? 'flex' : 'hidden'} ${
+                  codeBeside ? 'xl:flex xl:w-[min(46%,34rem)] xl:flex-none' : 'xl:flex'
+                } min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] shadow-[var(--shadow)]`}
+              >
+                <CodePanel action={action} />
+              </div>
             </div>
           </div>
         </div>

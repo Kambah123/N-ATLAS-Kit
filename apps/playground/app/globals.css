@@ -61,6 +61,14 @@ body {
   min-height: 100%;
 }
 
+@media (max-width: 768px) {
+  html,
+  body {
+    height: var(--app-height, 100dvh);
+    overflow: hidden;
+  }
+}
+
 body {
   margin: 0;
   background: var(--bg);

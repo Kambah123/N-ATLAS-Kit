@@ -40,9 +40,12 @@ export function ChatPanel({
           </button>
         </div>
       ) : null}
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4" aria-live="polite">
+      <div
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4"
+        aria-live="polite"
+      >
         {chat.messages.length === 0 ? (
-          <div className="mx-auto flex h-full max-w-lg flex-col items-center justify-center text-center">
+          <div className="mx-auto flex max-w-lg flex-col items-center text-center max-[768px]:py-4 min-[769px]:h-full min-[769px]:justify-center">
             <h2 className="text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
               Ask N-ATLaS
             </h2>
@@ -89,7 +92,7 @@ export function ChatPanel({
       </div>
 
       <form
-        className="shrink-0 border-t border-[var(--line)] px-3 py-3 sm:px-4"
+        className="shrink-0 border-t border-[var(--line)] px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4"
         onSubmit={(event) => {
           event.preventDefault();
           void chat.send(chat.draft);
@@ -114,13 +117,13 @@ export function ChatPanel({
             {chat.notice}
           </p>
         ) : null}
-        <div className="mb-2 flex flex-wrap gap-2">
+        <div className="mb-2 flex gap-2 max-[768px]:flex-nowrap max-[768px]:overflow-x-auto max-[768px]:pb-1 min-[769px]:flex-wrap">
           {option.examples.map((example) => (
             <button
               key={example}
               type="button"
               onClick={() => chat.setDraft(example)}
-              className="max-w-full rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 py-1.5 text-left text-xs leading-5 whitespace-normal text-[var(--ink)] hover:border-[var(--gold-line)]"
+              className="max-w-full rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 py-1.5 text-left text-xs leading-5 text-[var(--ink)] hover:border-[var(--gold-line)] max-[768px]:max-w-none max-[768px]:shrink-0 max-[768px]:whitespace-nowrap min-[769px]:whitespace-normal"
             >
               {example}
             </button>
