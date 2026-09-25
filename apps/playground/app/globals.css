@@ -85,6 +85,11 @@ body {
   font-optical-sizing: auto;
 }
 
+/* Author styles would otherwise beat the browser rule that hides this. */
+details:not([open]) > :not(summary) {
+  display: none;
+}
+
 input[type='range'] {
   accent-color: var(--accent);
   width: 100%;
