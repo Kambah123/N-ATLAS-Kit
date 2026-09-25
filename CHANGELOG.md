@@ -22,6 +22,11 @@ together from this file.
   and the rest). `docs/vercel.json` sets `cleanUrls` so a direct load is not a
   404 while the `.html` file still exists.
 
+### Added
+
+- Playground demo videos on the docs home page (English and Hausa) and the
+  chat recording on both quickstarts.
+
 ## [0.1.0] - 2026-09-25
 
 First published release. [`n-atlas@0.1.0`](https://www.npmjs.com/package/n-atlas)

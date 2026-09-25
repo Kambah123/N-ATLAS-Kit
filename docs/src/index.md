@@ -1,3 +1,10 @@
+<script setup>
+const chatSrc = '/videos/chat-code.mp4';
+const chatPoster = '/videos/chat-code.jpg';
+const speechSrc = '/videos/speech-yoruba.mp4';
+const speechPoster = '/videos/speech-yoruba.jpg';
+</script>
+
 # N-ATLAS Kit
 
 Developer toolkit for **N-ATLaS**, Nigeria's sovereign multilingual model, and
@@ -11,6 +18,20 @@ It does not ship weights.
 
 A Hausa draft of this page is at [Bayani](/ha/). It has not been reviewed by a
 native speaker.
+
+## See it in action {#see-it-in-action}
+
+Two recordings from the [playground](https://natlas-playground.vercel.app).
+
+<figure class="demo-figure">
+  <video class="demo-video" controls muted playsinline preload="metadata" :poster="chatPoster" :src="chatSrc"></video>
+  <figcaption>Hausa chat in the playground, then Get code copies a working SDK call.</figcaption>
+</figure>
+
+<figure class="demo-figure">
+  <video class="demo-video" controls muted playsinline preload="metadata" :poster="speechPoster" :src="speechSrc"></video>
+  <figcaption>Yorùbá chat and the Tune panel, then Speech transcribes audio and translates it.</figcaption>
+</figure>
 
 ## Why this exists
 
