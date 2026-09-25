@@ -3,6 +3,15 @@ import { defineConfig } from 'vitepress';
 const attribution =
   'N-ATLaS is an initiative of the Federal Ministry of Communications, Innovation and Digital Economy, and powered by Awarri Technologies.';
 
+const socialLinks = [
+  { icon: 'github', link: 'https://github.com/Kambah123/N-ATLAS-Kit' },
+  { icon: 'x', link: 'https://x.com/0xSkamber' },
+];
+
+const builder =
+  'Built by <a href="https://www.onedevstudioo.site/" target="_blank" rel="noopener">OneDev Studioo</a>' +
+  ' · <a href="https://x.com/0xSkamber" target="_blank" rel="noopener">@0xSkamber</a>';
+
 /** @type {import('vitepress').DefaultTheme.NavItem[]} */
 const enNav = [
   { text: 'Quickstart', link: '/quickstart' },
@@ -56,10 +65,10 @@ export default defineConfig({
     sidebar: enSidebar,
     outline: { level: [2, 3] },
     search: { provider: 'local' },
-    socialLinks: [{ icon: 'github', link: 'https://github.com/Kambah123/N-ATLAS-Kit' }],
+    socialLinks,
     footer: {
       message: attribution,
-      copyright: 'Toolkit code is Apache-2.0. The N-ATLaS and NCAIR1 speech models are not.',
+      copyright: `Toolkit code is Apache-2.0. The N-ATLaS and NCAIR1 speech models are not. ${builder}`,
     },
   },
   locales: {
@@ -106,9 +115,10 @@ export default defineConfig({
         darkModeSwitchLabel: 'Yanayi',
         sidebarMenuLabel: 'Jerin shafuka',
         returnToTopLabel: 'Koma sama',
+        socialLinks,
         footer: {
           message: `Ana buƙatar mai magana da Hausa ya duba fassarar. ${attribution}`,
-          copyright: 'Lambar kayan aikin Apache-2.0 ce. Samfuran ba haka ba.',
+          copyright: `Lambar kayan aikin Apache-2.0 ce. Samfuran ba haka ba. ${builder}`,
         },
       },
     },

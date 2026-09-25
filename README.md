@@ -341,3 +341,5 @@ Communications, Innovation and Digital Economy**, with voice data contributed by
 Nigerians across all six geopolitical zones via the Langeasy platform.
 
 This toolkit is an independent, community-built client for their work.
+
+Built by [OneDev Studioo](https://www.onedevstudioo.site/) · [X @0xSkamber](https://x.com/0xSkamber).

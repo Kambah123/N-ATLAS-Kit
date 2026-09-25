@@ -101,4 +101,4 @@ Apache-2.0. Public deployments are capped at 1,000 active end-users in any
 rolling 30 days. Details are in the repo [`NOTICE`](../../NOTICE). This app's
 code is Apache-2.0.
 
-Built by OneDev Studioo.
+Built by [OneDev Studioo](https://www.onedevstudioo.site/) · [X @0xSkamber](https://x.com/0xSkamber).

@@ -13,6 +13,7 @@ import {
   IconMic,
   IconMoon,
   IconSun,
+  IconX,
   Mark,
 } from '@/components/icons';
 import { SpeechPanel } from '@/components/speech-panel';
@@ -27,6 +28,7 @@ type Tab = 'chat' | 'speech' | 'code';
 
 const DOCS_HREF = 'https://natlas-docs.vercel.app';
 const GITHUB_HREF = 'https://github.com/Kambah123/N-ATLAS-Kit';
+const X_HREF = 'https://x.com/0xSkamber';
 
 const TABS: { id: Tab; label: string; icon: typeof IconChat }[] = [
   { id: 'chat', label: 'Chat', icon: IconChat },
@@ -207,6 +209,16 @@ export function Playground({ configured }: { configured: boolean }) {
               className="rounded-xl p-2.5 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
             >
               <IconGitHub className="h-5 w-5" />
+            </a>
+            <a
+              href={X_HREF}
+              target="_blank"
+              rel="noopener"
+              title="X @0xSkamber"
+              aria-label="X @0xSkamber"
+              className="rounded-xl p-2.5 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
+            >
+              <IconX className="h-5 w-5" />
             </a>
           </div>
         </nav>
