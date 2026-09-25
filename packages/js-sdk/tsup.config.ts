@@ -14,6 +14,8 @@ export default defineConfig({
   // and never reach for a Node built-in in the core paths.
   target: 'es2022',
   platform: 'neutral',
+  // File paths are read with a dynamic import so browsers never bundle Node.
+  external: ['node:fs/promises', 'node:path'],
   outExtension({ format }) {
     return { js: format === 'cjs' ? '.cjs' : '.js' };
   },

@@ -74,6 +74,11 @@ image = (
     # That image's ENTRYPOINT launches the vLLM server. Modal needs to run its
     # own process, so clear it.
     .entrypoint([])
+    # v0.11.0 installs Python as `python3` only (`/usr/bin/python3` via
+    # update-alternatives). There is no `python` binary. Modal's pip_install
+    # runs `python -m pip`, which exits 127 (`/bin/sh: 1: python: not found`)
+    # until this link exists. The container worker looks up `python` too.
+    .run_commands('ln -sf "$(command -v python3)" /usr/local/bin/python')
     .apt_install("ffmpeg")
     .pip_install(
         "fastapi>=0.115",

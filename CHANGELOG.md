@@ -10,7 +10,27 @@ together from this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Modal image build: `vllm/vllm-openai:v0.11.0` has `python3` and no `python`
+  binary, so Modal's `pip_install` exited 127. The image now links `python3`
+  to `/usr/local/bin/python` before installing packages. The Dockerfile does
+  the same so `docker compose` can start vLLM with `python`.
+- `modal_preflight.py` no longer describes a missing `Function.with_options`
+  (modal older than 1.4.3) as "no payment method". Older clients still run
+  the pinned A10 GPU check, and a real billing failure is reported only when
+  Modal's own error says so.
+
 ### Added
+
+- `n-atlas` (JavaScript) and `natlas` (Python) clients for the `/serve`
+  gateway: chat (including SSE streaming), transcription for Hausa, Igbo,
+  Yoruba, and Nigerian English, `listModels` / `health`, plus small helpers
+  that prompt N-ATLaS to translate, summarise, detect language, or reply to a
+  voice note. Typed errors, timeouts, and retries with backoff. Tests mock
+  HTTP and do not call a GPU.
+- Runnable examples under `examples/js` and `examples/python` for chat,
+  streaming, and transcription.
 
 - pnpm workspace monorepo: `packages/js-sdk`, `packages/python-sdk`, `serve`,
   `apps/playground`, `docs`, `examples`.

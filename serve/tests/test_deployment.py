@@ -152,3 +152,106 @@ def test_modal_app_does_not_pin_a_warm_container() -> None:
     assert "min_containers" not in (SERVE / "modal_app.py").read_text().replace(
         "# Deliberately absent: min_containers.", ""
     )
+
+
+def test_modal_image_links_python3_before_pip_install() -> None:
+    """vllm/vllm-openai:v0.11.0 has python3 only. Modal's pip_install calls python."""
+    text = (SERVE / "modal_app.py").read_text()
+    link = 'ln -sf "$(command -v python3)" /usr/local/bin/python'
+    assert text.index(".entrypoint([])") < text.index(link) < text.index(".pip_install(")
+
+
+def test_dockerfile_links_python3_before_pip() -> None:
+    """Compose starts vLLM with `python` on the same base image."""
+    text = (SERVE / "Dockerfile").read_text()
+    link = 'ln -sf "$(command -v python3)" /usr/local/bin/python'
+    assert text.index("ENTRYPOINT []") < text.index(link) < text.index("pip install")
+
+
+def test_preflight_gpu_errors_name_the_real_cause() -> None:
+    preflight = _load_preflight()
+
+    class _Old:
+        def remote(self) -> dict[str, bool]:
+            return {"ok": True}
+
+    runner, note = preflight.prepare_gpu_check(_Old(), "A10")
+    assert runner.remote()["ok"] is True
+    assert note is not None and "1.4.3" in note
+
+    with pytest.raises(preflight.GpuClientTooOldError, match="pinned GPU"):
+        preflight.prepare_gpu_check(_Old(), "L4")
+
+    class _New:
+        def with_options(self, *, gpu: str) -> _New:
+            self.gpu = gpu
+            return self
+
+        def remote(self) -> str:
+            return self.gpu
+
+    runner, note = preflight.prepare_gpu_check(_New(), "L40S")
+    assert note is None
+    assert runner.remote() == "L40S"
+
+    missing = preflight.format_gpu_failure(AttributeError("Function has no attribute with_options"))
+    assert "client-version" in missing
+    assert "not a missing payment method" in missing
+
+    billing = preflight.format_gpu_failure(RuntimeError("no payment method on file"))
+    assert "https://modal.com/settings/billing" in billing
+    assert "client-version" not in billing
+
+    quota = preflight.format_gpu_failure(RuntimeError("GPU quota exceeded for A10"))
+    assert "quota" in quota
+    assert "Most likely cause: no payment method" not in quota
+    assert "only when" in quota
+
+
+def _load_preflight():
+    """Import the pre-flight script. Stub ``modal`` when it is not installed."""
+    import importlib
+    import sys
+    import types
+
+    if "modal_preflight" in sys.modules:
+        return sys.modules["modal_preflight"]
+    try:
+        return importlib.import_module("modal_preflight")
+    except ModuleNotFoundError:
+        modal = types.ModuleType("modal")
+
+        class _Image:
+            @staticmethod
+            def debian_slim(**_kwargs: object) -> _Image:
+                return _Image()
+
+            def pip_install(self, *_args: object, **_kwargs: object) -> _Image:
+                return self
+
+        class _App:
+            def __init__(self, *_args: object, **_kwargs: object) -> None:
+                self.name = _args[0] if _args else "natlas-preflight"
+
+            def function(self, **_kwargs: object):
+                def decorate(fn):
+                    return fn
+
+                return decorate
+
+            def local_entrypoint(self):
+                def decorate(fn):
+                    return fn
+
+                return decorate
+
+        class _Secret:
+            @staticmethod
+            def from_name(_name: str) -> str:
+                return _name
+
+        modal.Image = _Image
+        modal.App = _App
+        modal.Secret = _Secret
+        sys.modules["modal"] = modal
+        return importlib.import_module("modal_preflight")

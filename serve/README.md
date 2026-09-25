@@ -405,8 +405,11 @@ below matters.
   measured. `modal_preflight.py` checks them against a real card; run it.
 - **`docker compose up`.** The compose file is parsed and structurally asserted
   in tests, but no image has been built and no container started.
-- **`modal deploy`.** `modal_app.py` imports cleanly and every Modal API it
-  calls was verified against `modal` 1.5.5, but it has never been deployed.
+- **`modal deploy`.** A real image build of `vllm/vllm-openai:v0.11.0` failed
+  at Modal's `pip_install` with `/bin/sh: 1: python: not found` (that image
+  only has `python3`). `modal_app.py` now links `python3` to `python` before
+  installing packages. A deploy that finishes, loads the weights, and serves
+  traffic has still not been completed here.
 - **Cold-start time** and whether the 20-minute healthcheck `start_period` is
   generous enough for a first-run download.
 - End-to-end **streaming from real vLLM**, and whether the usage chunk arrives
