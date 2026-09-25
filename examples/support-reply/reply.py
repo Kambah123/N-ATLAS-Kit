@@ -4,7 +4,7 @@ The customer's message is sent to the gateway. The reply printed on stdout is
 the model's text. If NATLAS_BASE_URL or NATLAS_API_KEY is missing, the script
 exits and does not invent a reply.
 
-    pip install -e packages/python-sdk
+    pip install natlas
     python examples/support-reply/reply.py --message "My transfer has not arrived" --language en
 """
 

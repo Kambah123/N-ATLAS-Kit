@@ -16,7 +16,7 @@ it exits with `No N-ATLAS backend connected` and sends nothing.
 Python 3.10 or newer, from the repository root:
 
 ```bash
-pip install -e packages/python-sdk
+pip install natlas
 
 export NATLAS_BASE_URL=https://kambah123--natlas-serve-natlasservice-serve.modal.run
 export NATLAS_API_KEY=your-gateway-key

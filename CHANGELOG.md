@@ -10,6 +10,17 @@ together from this file.
 
 ## [Unreleased]
 
+### Changed
+
+- README, docs (English and Hausa), the playground Get code panel, and the
+  examples use the published installs: `npm install n-atlas`, `pnpm add n-atlas`,
+  and `pip install natlas`.
+
+## [0.1.0] - 2026-09-25
+
+First published release. [`n-atlas@0.1.0`](https://www.npmjs.com/package/n-atlas)
+is on npm and [`natlas==0.1.0`](https://pypi.org/project/natlas/) is on PyPI.
+
 ### Added
 
 - `.github/workflows/release.yml` publishes `n-atlas` to npm (provenance, public)
@@ -18,10 +29,6 @@ together from this file.
 
 ### Changed
 
-- `n-atlas` and `natlas` are 0.1.0, the first version prepared for the
-  registries. Homepages point at <https://natlas-docs.vercel.app>. Install
-  docs say the packages are not on npm or PyPI yet and give a GitHub install
-  that needs a public repository.
 - JavaScript support is Node 20 and newer. Node 18 is EOL, and the JS SDK job
   on pull request #2 failed only on Node 18: `File is not defined` while the
   transcription tests inspected a multipart upload. Node 20 and 22 were
@@ -73,3 +80,4 @@ together from this file.
   pitch, planned features and repo layout.
 
 [Unreleased]: https://github.com/Kambah123/N-ATLAS-Kit/commits/main
+[0.1.0]: https://www.npmjs.com/package/n-atlas/v/0.1.0

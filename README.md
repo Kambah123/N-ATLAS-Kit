@@ -2,19 +2,66 @@
 
 # N-ATLAS Kit
 
-**The developer toolkit for N-ATLaS — Nigeria's sovereign multilingual LLM.**
-
-Hausa 🇳🇬 Igbo 🇳🇬 Yorùbá 🇳🇬 Nigerian English
+The developer toolkit for N-ATLaS, Nigeria's sovereign multilingual LLM.
 
 [![CI](https://github.com/Kambah123/N-ATLAS-Kit/actions/workflows/ci.yml/badge.svg)](https://github.com/Kambah123/N-ATLAS-Kit/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/code%20license-Apache--2.0-blue.svg)](./LICENSE)
-[![npm](https://img.shields.io/badge/npm-n--atlas-CB3837.svg)](https://www.npmjs.com/package/n-atlas)
-[![PyPI](https://img.shields.io/badge/PyPI-natlas-3775A9.svg)](https://pypi.org/project/natlas/)
+[![npm](https://img.shields.io/npm/v/n-atlas)](https://www.npmjs.com/package/n-atlas)
+[![PyPI](https://img.shields.io/pypi/v/natlas)](https://pypi.org/project/natlas/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](./LICENSE)
+[![Playground](https://img.shields.io/badge/playground-live-1a7f4e)](https://natlas-playground.vercel.app)
+[![Docs](https://img.shields.io/badge/docs-live-1a7f4e)](https://natlas-docs.vercel.app)
+
+[Playground](https://natlas-playground.vercel.app) · [Docs](https://natlas-docs.vercel.app) · [Hausa docs](https://natlas-docs.vercel.app/ha/)
+
+Hausa · Igbo · Yorùbá · Nigerian English · Pidgin (beta)
+
+Built by [OneDev Studioo](https://www.onedevstudioo.site/) · [X @0xSkamber](https://x.com/0xSkamber)
 
 _Built for the National AI Innovation Challenge 2026 — Problem Statement 1:
 "Build the tools that make N-ATLAS easy to build with."_
 
 </div>
+
+## 30-second quickstart
+
+JavaScript (Node 20+):
+
+```bash
+npm install n-atlas
+# or: pnpm add n-atlas
+```
+
+```ts
+import { NAtlas } from 'n-atlas';
+
+const natlas = new NAtlas({ baseURL: process.env.NATLAS_BASE_URL });
+
+const reply = await natlas.chat({
+  messages: [{ role: 'user', content: 'Sannu!' }],
+  language: 'ha',
+});
+console.log(reply.content);
+```
+
+Python (3.10+):
+
+```bash
+pip install natlas
+```
+
+```python
+import os
+from natlas import NAtlas
+
+with NAtlas(base_url=os.environ["NATLAS_BASE_URL"]) as natlas:
+    reply = natlas.chat(
+        messages=[{"role": "user", "content": "Sannu!"}],
+        language="ha",
+    )
+    print(reply.content)
+```
+
+Set `NATLAS_BASE_URL` and `NATLAS_API_KEY`. Chat and speech cover **Hausa**, **Igbo**, **Yorùbá**, and **Nigerian English**. **Nigerian Pidgin is beta** in the [playground](https://natlas-playground.vercel.app).
 
 ---
 
@@ -39,18 +86,9 @@ a Hausa voice-note app on a Friday night" is the entire problem.
 N-ATLAS Kit closes that distance:
 
 ```bash
-npm install n-atlas          #  JS / TS
-pip install natlas           #  Python
+npm install n-atlas          #  or: pnpm add n-atlas
+pip install natlas
 ```
-
-`n-atlas` and `natlas` are not on npm or PyPI yet. Not on npm/PyPI yet? Install from GitHub. The repository must be public.
-
-```bash
-pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk"
-pip install "git+https://github.com/Kambah123/N-ATLAS-Kit.git#subdirectory=packages/python-sdk"
-```
-
-`npm install` of the repository URL installs the private workspace root, not `n-atlas`. Use the `pnpm` command for JavaScript.
 
 ```ts
 import { NAtlas } from 'n-atlas';
@@ -77,12 +115,12 @@ Same API in Python. Same API in the browser. Same API on the edge.
 
 ### Four things, one repo
 
-|                                  |                                                                                                                                            |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 🧰 **Two SDKs**                  | `n-atlas` (npm) and `natlas` (PyPI). Typed, tested, zero heavy deps, pluggable backends. Not published yet — see the GitHub install above. |
-| 🖥️ **A self-hosting kit**        | One command puts the LLM _and_ all four ASR models behind a single OpenAI-compatible base URL, on one GPU.                                 |
-| 🎛️ **A playground**              | Chat, speech and tools in the browser — with a "get the code" panel that hands you the exact JS, Python and curl for what you just did.    |
-| 📚 **Docs in English and Hausa** | VitePress site in [`docs/`](./docs/). Hausa overview and quickstart are drafts and say so until a native speaker reviews them.             |
+|                                  |                                                                                                                                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🧰 **Two SDKs**                  | [`n-atlas`](https://www.npmjs.com/package/n-atlas) (`npm install n-atlas`) and [`natlas`](https://pypi.org/project/natlas/) (`pip install natlas`). Typed, tested, zero heavy deps, pluggable backends. |
+| 🖥️ **A self-hosting kit**        | One command puts the LLM _and_ all four ASR models behind a single OpenAI-compatible base URL, on one GPU.                                                                                              |
+| 🎛️ **A playground**              | Chat, speech and tools in the browser — with a "get the code" panel that hands you the exact JS, Python and curl for what you just did.                                                                 |
+| 📚 **Docs in English and Hausa** | VitePress site in [`docs/`](./docs/). Hausa overview and quickstart are drafts and say so until a native speaker reviews them.                                                                          |
 
 ### Principles
 
@@ -103,11 +141,11 @@ Same API in Python. Same API in the browser. Same API on the edge.
 
 |                |                                                                                                                                       |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Docs           | [`docs/`](./docs/) — `pnpm --filter @n-atlas/docs build` writes a static site to `docs/.vitepress/dist`                               |
-| JavaScript SDK | [`packages/js-sdk`](./packages/js-sdk/) — npm name `n-atlas`                                                                          |
-| Python SDK     | [`packages/python-sdk`](./packages/python-sdk/) — import name `natlas`                                                                |
+| Docs           | <https://natlas-docs.vercel.app> — Hausa: <https://natlas-docs.vercel.app/ha/>                                                        |
+| JavaScript SDK | [`n-atlas`](https://www.npmjs.com/package/n-atlas) — `npm install n-atlas` or `pnpm add n-atlas`                                      |
+| Python SDK     | [`natlas`](https://pypi.org/project/natlas/) — `pip install natlas`                                                                   |
 | Examples       | [`examples/`](./examples/) — voice-note translator and a support-reply helper, plus short scripts                                     |
-| Playground     | [`apps/playground`](./apps/playground/) — browser chat, speech, and get-code                                                          |
+| Playground     | <https://natlas-playground.vercel.app> — chat, speech, and get-code                                                                   |
 | Gateway        | [`serve/`](./serve/) — self-host with Modal or Docker Compose                                                                         |
 | Live health    | <https://kambah123--natlas-serve-natlasservice-serve.modal.run/health> (no API key; scales to zero, so a cold start can take minutes) |
 

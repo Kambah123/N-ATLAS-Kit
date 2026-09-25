@@ -76,7 +76,17 @@ importers:
         specifier: ^3.5.13
         version: 3.5.43(typescript@5.9.3)
 
-  examples/voice-note-translator: {}
+  examples/js:
+    dependencies:
+      n-atlas:
+        specifier: workspace:*
+        version: link:../../packages/js-sdk
+
+  examples/voice-note-translator:
+    dependencies:
+      n-atlas:
+        specifier: workspace:*
+        version: link:../../packages/js-sdk
 
   packages/js-sdk:
     devDependencies:

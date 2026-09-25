@@ -1,6 +1,6 @@
 """Stream a Hausa reply from a running N-ATLaS gateway.
 
-    pip install -e packages/python-sdk
+    pip install natlas
     NATLAS_BASE_URL=http://localhost:8080 NATLAS_API_KEY=... python examples/python/stream.py
 """
 

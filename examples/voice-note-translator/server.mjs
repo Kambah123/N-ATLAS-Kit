@@ -2,7 +2,7 @@
  * Local page for a WhatsApp-style voice note: transcribe, then translate or reply.
  * Binds to 127.0.0.1 only. The API key stays in this process.
  *
- *   pnpm --filter n-atlas build
+ *   npm install n-atlas
  *   NATLAS_BASE_URL=... NATLAS_API_KEY=... node server.mjs
  */
 import http from 'node:http';

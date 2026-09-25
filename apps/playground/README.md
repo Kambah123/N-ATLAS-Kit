@@ -9,18 +9,11 @@ and those handlers call the gateway in [`/serve`](../../serve/README.md).
 
 ## What you can do
 
-| Tab          | What it does                                                                                                                                                                                                                                                                                                                         |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Chat**     | Stream a reply from `NCAIR1/N-ATLaS`. Pick a language hint (English, Hausa, Igbo, Yorùbá, Pidgin), try an example prompt, and set temperature and max tokens.                                                                                                                                                                        |
-| **Speech**   | Record from the microphone or upload `.ogg` (WhatsApp), `.mp3`, `.m4a`, or `.wav`. Choose Hausa, Igbo, Yorùbá, or Nigerian English — each one selects that NCAIR1 ASR model. **Reply to this** sends the transcript into chat. **Translate to English** asks N-ATLaS for an English rendering.                                       |
-| **Get code** | Curl, [`n-atlas`](../../packages/js-sdk/) (`npm install n-atlas`), and [`natlas`](../../packages/python-sdk/) (`pip install natlas`) for the last chat or transcription. Those registry installs are not published yet. Curl stays the raw gateway call. The playground itself still calls the route handlers, not the SDK packages. |
-
-Not on npm/PyPI yet? Install from GitHub. The repository must be public.
-
-```bash
-pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk"
-pip install "git+https://github.com/Kambah123/N-ATLAS-Kit.git#subdirectory=packages/python-sdk"
-```
+| Tab          | What it does                                                                                                                                                                                                                                                                                                                     |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Chat**     | Stream a reply from `NCAIR1/N-ATLaS`. Pick a language hint (English, Hausa, Igbo, Yorùbá, Pidgin), try an example prompt, and set temperature and max tokens.                                                                                                                                                                    |
+| **Speech**   | Record from the microphone or upload `.ogg` (WhatsApp), `.mp3`, `.m4a`, or `.wav`. Choose Hausa, Igbo, Yorùbá, or Nigerian English — each one selects that NCAIR1 ASR model. **Reply to this** sends the transcript into chat. **Translate to English** asks N-ATLaS for an English rendering.                                   |
+| **Get code** | Curl, [`n-atlas`](https://www.npmjs.com/package/n-atlas) (`npm install n-atlas` or `pnpm add n-atlas`), and [`natlas`](https://pypi.org/project/natlas/) (`pip install natlas`) for the last chat or transcription. Curl stays the raw gateway call. The playground itself still calls the route handlers, not the SDK packages. |
 
 A status pill polls `GET /health`. A cold gateway (Modal scales to zero) shows
 **Waking the model up (first request can take ~2 min)**. The server follows

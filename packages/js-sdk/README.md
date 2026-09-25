@@ -13,18 +13,9 @@ is no public hosted API, and this package will not call any other vendor's model
 ## Install
 
 ```bash
-npm install n-atlas      # or: pnpm add n-atlas / yarn add n-atlas
+npm install n-atlas
+pnpm add n-atlas
 ```
-
-That registry install works after the package is published. It is not on npm yet.
-
-Not on npm/PyPI yet? Install from GitHub. The repository must be public.
-
-```bash
-pnpm add "github:Kambah123/N-ATLAS-Kit#path:packages/js-sdk"
-```
-
-`npm install` of the repository URL installs the private workspace root, not `n-atlas`. The `pnpm` command above is the one that selects `packages/js-sdk` and builds it.
 
 Node 20+ and modern browsers. ESM and CJS, built with tsup. The runtime
 dependency is `fetch` (global in Node 20+ and browsers). Reading a filesystem
@@ -137,7 +128,7 @@ jitter. A numeric `Retry-After` on 429 replaces that delay.
 
 ## Runnable examples
 
-From the repo root, after `pnpm --filter n-atlas build`:
+Install the published package (`npm install n-atlas` or `pnpm add n-atlas`), then from the repo root:
 
 ```bash
 node examples/js/chat.mjs

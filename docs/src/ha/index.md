@@ -10,7 +10,8 @@ matsayin fassarar da aka tabbatar.
 Kayan aiki ne na masu haɓaka software don **N-ATLaS**, babban samfurin harsuna
 da yawa na Najeriya, tare da samfuran ji huɗu na NCAIR1.
 
-N-ATLaS yana magana da **Hausa, Igbo, Yorùbá, da Turancin Najeriya**. Samfuran
+N-ATLaS yana magana da **Hausa, Igbo, Yorùbá, da Turancin Najeriya**. Playground
+yana da Nigerian Pidgin (beta). Samfuran
 ji kowannensu Whisper Small ne, ɗaya ga kowane harshe, an horar da su da muryoyin
 da aka yi rikodin a dukkan yankunan Najeriya shida. Wannan repo ba ya ɗauke da
 nauyin samfurin. Abin da yake ɗauka shi ne mai kira da kuma kayan girka.
@@ -26,13 +27,13 @@ yana karɓar sauti na daƙiƙa 30 kawai a 16 kHz, mono.
 
 N-ATLAS Kit shine layer da ke gaba:
 
-| Abu                  | Shi ne                                                                |
-| -------------------- | --------------------------------------------------------------------- |
-| `serve/`             | Ƙofa ɗaya, irin OpenAI, don chat da dukkan samfuran ji huɗu           |
-| `n-atlas`            | SDK na JavaScript / TypeScript                                        |
-| `natlas`             | SDK na Python, sync da async                                          |
-| [Misalai](/examples) | Ƙananan apps da za ka iya gudanarwa                                   |
-| Playground           | App na browser. Ana ginawa daban. Wannan shafin yana nuna hanya kawai |
+| Abu                                                | Shi ne                                                                      |
+| -------------------------------------------------- | --------------------------------------------------------------------------- |
+| `serve/`                                           | Ƙofa ɗaya, irin OpenAI, don chat da dukkan samfuran ji huɗu                 |
+| `n-atlas`                                          | SDK na JavaScript / TypeScript. `npm install n-atlas` ko `pnpm add n-atlas` |
+| `natlas`                                           | SDK na Python, sync da async. `pip install natlas`                          |
+| [Misalai](/examples)                               | Ƙananan apps da za ka iya gudanarwa                                         |
+| [Playground](https://natlas-playground.vercel.app) | App na browser: chat, speech, da get-code                                   |
 
 Babu API na NCAIR da kowa ke kira a wannan sigar. Kowanne client yana ɗaukar
 `baseURL`. Gateway da aka girka don demo na gasar yana nan:
