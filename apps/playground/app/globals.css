@@ -4,48 +4,60 @@
 
 :root {
   color-scheme: light;
-  --bg: #f3efe4;
-  --bg-elev: #fffdf8;
-  --bg-sunken: #e8e1d2;
-  --ink: #15211c;
-  --muted: #5c675f;
-  --line: #e0d6c6;
-  --accent: #0e6b45;
-  --accent-ink: #f5fbf7;
-  --header: #073326;
-  --header-ink: #f6f3ea;
-  --header-muted: #c5ddd0;
-  --gold: #8a5a16;
-  --gold-line: #c6a15b;
-  --danger: #8d2f2f;
+  --bg: #eef2f6;
+  --bg-elev: #ffffff;
+  --bg-sunken: #f4f7fb;
+  --ink: #122033;
+  --muted: #3d4c60;
+  --line: #e3e8ef;
+  --accent: #085c38;
+  --accent-ink: #ffffff;
+  --blue: #1d4ed8;
+  --blue-ink: #ffffff;
+  --header: #ffffff;
+  --header-ink: #122033;
+  --header-muted: #3d4c60;
+  --gold: #7a4e0d;
+  --gold-line: #c9891a;
+  --danger: #9b1c1c;
   --danger-bg: #fde8e4;
-  --user: #0e6b45;
-  --user-ink: #f4fff8;
-  --shadow: 0 18px 50px rgba(23, 40, 32, 0.08);
-  --ring: #0e6b45;
+  --user: #085c38;
+  --user-ink: #ffffff;
+  --shadow: 0 10px 30px rgba(18, 32, 51, 0.06);
+  --ring: #1d4ed8;
+  --code-bg: #f8fafc;
+  --code-ink: #1b2838;
+  --code-muted: #5c6b80;
+  --code-line: #e6ebf2;
 }
 
 .dark {
   color-scheme: dark;
-  --bg: #081410;
-  --bg-elev: #10201a;
-  --bg-sunken: #0c1914;
-  --ink: #f3efe4;
-  --muted: #b7c3b9;
-  --line: #24362e;
+  --bg: #0e141c;
+  --bg-elev: #171e28;
+  --bg-sunken: #121922;
+  --ink: #e8eef6;
+  --muted: #c5d0de;
+  --line: #2c3848;
   --accent: #3dbe7a;
   --accent-ink: #062117;
-  --header: #04140f;
-  --header-ink: #f6f3ea;
-  --header-muted: #b7cfc2;
-  --gold: #e2c16b;
-  --gold-line: #e2c16b;
+  --blue: #8eb0ff;
+  --blue-ink: #0c1733;
+  --header: #171e28;
+  --header-ink: #e8eef6;
+  --header-muted: #c5d0de;
+  --gold: #f0c36a;
+  --gold-line: #f0c36a;
   --danger: #ffb4ae;
   --danger-bg: #3a1818;
-  --user: #135c3c;
-  --user-ink: #f3efe4;
-  --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
-  --ring: #3dbe7a;
+  --user: #146b42;
+  --user-ink: #f4fff8;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --ring: #8eb0ff;
+  --code-bg: #0f1620;
+  --code-ink: #e7eef6;
+  --code-muted: #93a3b8;
+  --code-line: #243140;
 }
 
 html,
@@ -55,24 +67,13 @@ body {
 
 body {
   margin: 0;
-  background:
-    radial-gradient(
-      1000px 420px at 0% -10%,
-      color-mix(in srgb, var(--accent) 16%, transparent),
-      transparent 55%
-    ),
-    radial-gradient(
-      800px 380px at 100% 0%,
-      color-mix(in srgb, var(--gold-line) 20%, transparent),
-      transparent 50%
-    ),
-    var(--bg);
+  background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 30%, white);
+  background: color-mix(in srgb, var(--blue) 28%, white);
 }
 
 :focus-visible {
@@ -80,9 +81,8 @@ body {
   outline-offset: 2px;
 }
 
-.font-display {
-  font-family: var(--font-fraunces), Georgia, 'Times New Roman', serif;
-  font-optical-sizing: auto;
+.font-mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 /* Author styles would otherwise beat the browser rule that hides this. */
@@ -102,7 +102,7 @@ input[type='range'] {
     transform: scale(1);
   }
   50% {
-    opacity: 0.4;
+    opacity: 0.45;
     transform: scale(0.82);
   }
 }
@@ -111,8 +111,38 @@ input[type='range'] {
   animation: pulse-dot 1.4s ease-in-out infinite;
 }
 
+@keyframes wave-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.wave-bar {
+  transform-origin: center;
+  animation: wave-bar 0.9s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-60%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+.progress-slide {
+  animation: progress-slide 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pulse-dot {
+  .pulse-dot,
+  .wave-bar,
+  .progress-slide {
     animation: none;
   }
 }

@@ -1,20 +1,24 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { ChatSettings } from '@/components/chat-settings';
+import { TuneFields } from '@/components/chat-settings';
+import { IconMic, IconPaperclip } from '@/components/icons';
+import { WakingCard } from '@/components/waking-card';
 import { type ChatController } from '@/components/use-chat';
-import { chatLanguageOption, PRIVACY_NOTE, WAKING_MESSAGE } from '@/lib/languages';
+import { chatLanguageOption } from '@/lib/languages';
 
 type Chat = ChatController;
 
 export function ChatPanel({
   chat,
   configured,
-  showMobileSettings,
+  onOpenSpeech,
+  onAttachAudio,
 }: {
   chat: Chat;
   configured: boolean;
-  showMobileSettings: boolean;
+  onOpenSpeech: () => void;
+  onAttachAudio: () => void;
 }) {
   const option = chatLanguageOption(chat.language);
   const endRef = useRef<HTMLDivElement>(null);
@@ -25,54 +29,32 @@ export function ChatPanel({
 
   return (
     <section className="flex min-h-0 flex-1 flex-col" aria-label="Chat">
-      {showMobileSettings ? (
-        <details className="border-b border-[var(--line)] px-4 py-3 lg:hidden">
-          <summary className="cursor-pointer text-sm font-medium">
-            Language, temperature, length
-          </summary>
-          <div className="pt-4">
-            <ChatSettings
-              idPrefix="chat-language-mobile"
-              language={chat.language}
-              onLanguage={chat.setLanguage}
-              temperature={chat.temperature}
-              onTemperature={chat.setTemperature}
-              maxTokens={chat.maxTokens}
-              onMaxTokens={chat.setMaxTokens}
-            />
-          </div>
-        </details>
+      {chat.messages.length > 0 ? (
+        <div className="flex shrink-0 justify-end px-4 pt-3">
+          <button
+            type="button"
+            onClick={chat.clear}
+            className="rounded-lg px-2 py-1 text-xs font-medium text-[var(--muted)] hover:bg-[var(--bg-sunken)]"
+          >
+            New chat
+          </button>
+        </div>
       ) : null}
-
-      <div
-        className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6"
-        aria-live="polite"
-      >
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4" aria-live="polite">
         {chat.messages.length === 0 ? (
-          <div className="mx-auto max-w-xl pt-6 sm:pt-12">
-            <p className="text-xs font-medium tracking-[0.16em] text-[var(--gold)] uppercase">
-              N-ATLaS
-            </p>
-            <h2 className="font-display mt-2 text-3xl text-[var(--ink)] sm:text-4xl">
-              Ask in {option.label}.
+          <div className="mx-auto flex h-full max-w-lg flex-col items-center justify-center text-center">
+            <h2 className="text-2xl font-semibold tracking-tight text-[var(--ink)] sm:text-3xl">
+              Ask N-ATLaS
             </h2>
-            <p className="mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">
-              Streaming replies from Nigeria&apos;s multilingual model. The language hint tells
-              N-ATLaS how to answer. It does not leave this server call.
+            <p className="mt-2 max-w-md text-sm leading-6 text-[var(--muted)]">
+              {option.blurb} Replies stream from Nigeria&apos;s model. The hint stays on this
+              server.
             </p>
-            <ul className="mt-6 space-y-2">
-              {option.examples.map((example) => (
-                <li key={example}>
-                  <button
-                    type="button"
-                    className="w-full rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] px-4 py-3 text-left text-sm leading-6 shadow-[var(--shadow)] transition hover:-translate-y-0.5"
-                    onClick={() => chat.setDraft(example)}
-                  >
-                    {example}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {chat.slow ? (
+              <div className="mt-5 w-full text-left">
+                <WakingCard />
+              </div>
+            ) : null}
           </div>
         ) : (
           chat.messages.map((message) => (
@@ -81,16 +63,18 @@ export function ChatPanel({
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[42rem] rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap ${
+                className={`max-w-[40rem] rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap ${
                   message.role === 'user'
                     ? 'bg-[var(--user)] text-[var(--user-ink)]'
-                    : 'border border-[var(--line)] bg-[var(--bg-elev)] text-[var(--ink)]'
+                    : 'border border-[var(--line)] bg-[var(--bg-sunken)] text-[var(--ink)]'
                 }`}
               >
                 {message.role === 'assistant' && message.content.length === 0 ? (
-                  <span className="text-[var(--muted)]">
-                    {chat.slow ? WAKING_MESSAGE : 'Thinking…'}
-                  </span>
+                  chat.slow ? (
+                    <WakingCard />
+                  ) : (
+                    <span className="text-[var(--muted)]">Thinking…</span>
+                  )
                 ) : (
                   message.content
                 )}
@@ -105,17 +89,12 @@ export function ChatPanel({
       </div>
 
       <form
-        className="border-t border-[var(--line)] bg-[var(--bg-elev)] px-4 py-3 sm:px-6"
+        className="shrink-0 border-t border-[var(--line)] px-3 py-3 sm:px-4"
         onSubmit={(event) => {
           event.preventDefault();
           void chat.send(chat.draft);
         }}
       >
-        {chat.slow ? (
-          <p className="mb-2 text-sm text-[var(--gold)]" role="status">
-            {WAKING_MESSAGE}
-          </p>
-        ) : null}
         {chat.error ? (
           <p
             className="mb-2 rounded-xl bg-[var(--danger-bg)] px-3 py-2 text-sm text-[var(--danger)]"
@@ -130,7 +109,19 @@ export function ChatPanel({
             <code>NATLAS_API_KEY</code> on the server, then reload.
           </p>
         ) : null}
-        <div className="flex items-end gap-2">
+        <div className="mb-2 flex gap-2 overflow-x-auto pb-1">
+          {option.examples.map((example) => (
+            <button
+              key={example}
+              type="button"
+              onClick={() => chat.setDraft(example)}
+              className="shrink-0 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 py-1.5 text-left text-xs text-[var(--ink)] hover:border-[var(--blue)]"
+            >
+              {example}
+            </button>
+          ))}
+        </div>
+        <div className="rounded-2xl border border-[var(--line)] bg-[var(--bg)] shadow-[var(--shadow)]">
           <label className="sr-only" htmlFor="chat-draft">
             Message
           </label>
@@ -146,29 +137,61 @@ export function ChatPanel({
             }}
             rows={2}
             placeholder={option.placeholder}
-            className="max-h-28 min-h-14 min-w-0 flex-1 resize-y rounded-2xl border border-[var(--line)] bg-[var(--bg)] px-4 py-3 text-sm leading-6 text-[var(--ink)]"
+            className="max-h-28 min-h-14 w-full resize-y bg-transparent px-3 pt-3 text-sm leading-6 text-[var(--ink)] outline-none"
           />
-          {chat.busy ? (
+          <div className="flex flex-wrap items-center gap-1 px-2 pb-2">
             <button
               type="button"
-              onClick={chat.stop}
-              className="rounded-2xl border border-[var(--line)] px-4 py-3 text-sm font-medium"
+              onClick={onOpenSpeech}
+              className="rounded-xl p-2 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
+              aria-label="Transcribe audio"
             >
-              Stop
+              <IconMic />
             </button>
-          ) : (
             <button
-              type="submit"
-              disabled={!configured || chat.draft.trim().length === 0}
-              className="rounded-2xl bg-[var(--accent)] px-4 py-3 text-sm font-medium text-[var(--accent-ink)] disabled:opacity-50"
+              type="button"
+              onClick={onAttachAudio}
+              className="rounded-xl p-2 text-[var(--muted)] hover:bg-[var(--bg-sunken)] hover:text-[var(--ink)]"
+              aria-label="Upload audio"
             >
-              Send
+              <IconPaperclip />
             </button>
-          )}
+            <details>
+              <summary className="cursor-pointer list-none rounded-xl px-2 py-2 text-xs font-medium text-[var(--muted)] hover:bg-[var(--bg-sunken)]">
+                Tune
+              </summary>
+              <div className="mt-1 w-[min(18rem,70vw)] rounded-2xl border border-[var(--line)] bg-[var(--bg-elev)] p-3">
+                <TuneFields
+                  temperature={chat.temperature}
+                  onTemperature={chat.setTemperature}
+                  maxTokens={chat.maxTokens}
+                  onMaxTokens={chat.setMaxTokens}
+                />
+              </div>
+            </details>
+            <p className="ml-auto hidden text-[11px] text-[var(--muted)] sm:block">
+              Enter sends, Shift+Enter adds a line.
+            </p>
+            {chat.busy ? (
+              <button
+                type="button"
+                onClick={chat.stop}
+                className="rounded-xl border border-[var(--line)] px-3 py-2 text-sm font-medium"
+              >
+                Stop
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={!configured || chat.draft.trim().length === 0}
+                aria-label="Send"
+                className="rounded-full bg-[var(--accent)] px-3 py-2 text-sm font-medium text-[var(--accent-ink)] disabled:opacity-50"
+              >
+                Send
+              </button>
+            )}
+          </div>
         </div>
-        <p className="mt-2 text-xs text-[var(--muted)]">
-          {PRIVACY_NOTE} Enter sends, Shift+Enter adds a line.
-        </p>
       </form>
     </section>
   );

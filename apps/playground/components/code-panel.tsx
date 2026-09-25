@@ -5,9 +5,9 @@ import { type LastAction } from '@/components/types';
 import { JS_SDK_HREF, PY_SDK_HREF, renderSnippets } from '@/lib/snippets';
 
 const TABS = [
-  { id: 'curl', label: 'curl' },
-  { id: 'javascript', label: 'n-atlas' },
-  { id: 'python', label: 'natlas' },
+  { id: 'curl', label: 'curl', file: 'request.sh' },
+  { id: 'javascript', label: 'n-atlas', file: 'request.mjs' },
+  { id: 'python', label: 'natlas', file: 'request.py' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -17,82 +17,83 @@ export function CodePanel({ action }: { action: LastAction | null }) {
   const [copied, setCopied] = useState(false);
   const snippets = useMemo(() => (action ? renderSnippets(action.request) : null), [action]);
   const current = snippets ? snippets[tab] : '';
+  const file = TABS.find((item) => item.id === tab)?.file ?? 'request.sh';
+  const lines = current.length > 0 ? current.replace(/\n$/, '').split('\n') : [];
 
   return (
     <section
-      className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 py-4 sm:px-6"
+      id="live-code"
+      tabIndex={-1}
+      className="flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--bg-elev)]"
       aria-label="Get code"
     >
-      <p className="text-xs font-medium tracking-[0.16em] text-[var(--gold)] uppercase">Get code</p>
-      <h2 className="font-display mt-1 text-2xl sm:text-3xl">The call you just made.</h2>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-        JavaScript uses{' '}
-        <a className="underline decoration-[var(--line)] underline-offset-2" href={JS_SDK_HREF}>
-          n-atlas
-        </a>{' '}
-        (<code>npm install n-atlas</code>). Python uses{' '}
-        <a className="underline decoration-[var(--line)] underline-offset-2" href={PY_SDK_HREF}>
-          natlas
-        </a>{' '}
-        (<code>pip install natlas</code>). Curl is the raw gateway call. Keep{' '}
-        <code>NATLAS_API_KEY</code> on the server.
-      </p>
-
-      {!action || !snippets ? (
-        <div className="mt-6 overflow-y-auto rounded-3xl border border-dashed border-[var(--line)] bg-[var(--bg-elev)] px-5 py-10 text-sm leading-6 text-[var(--muted)]">
-          Send a chat message or transcribe audio. Curl, n-atlas, and natlas for that request will
-          show up here. Nothing is stored after you close the tab.
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--line)] px-3 py-2">
+        <div role="tablist" aria-label="Snippet language" className="flex gap-1">
+          {TABS.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={tab === item.id}
+              onClick={() => {
+                setTab(item.id);
+                setCopied(false);
+              }}
+              className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
+                tab === item.id
+                  ? 'bg-[var(--bg-sunken)] text-[var(--ink)]'
+                  : 'text-[var(--muted)] hover:bg-[var(--bg-sunken)]'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+        <p className="min-w-0 flex-1 truncate text-xs text-[var(--muted)]">
+          {action ? action.title : 'Waiting for a request'}
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-2 border-b border-[var(--code-line)] bg-[var(--code-bg)] px-3 py-1.5">
+        <span className="font-mono text-xs text-[var(--code-ink)]">{file}</span>
+        <button
+          type="button"
+          disabled={lines.length === 0}
+          onClick={() => {
+            void navigator.clipboard.writeText(current).then(() => {
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1600);
+            });
+          }}
+          className="ml-auto rounded-lg border border-[var(--code-line)] px-2.5 py-1 text-xs font-medium text-[var(--code-ink)] disabled:opacity-40"
+        >
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      {lines.length === 0 ? (
+        <div className="flex min-h-0 flex-1 items-center justify-center bg-[var(--code-bg)] px-6 text-center">
+          <p className="max-w-sm text-sm leading-6 text-[var(--code-muted)]">
+            Send a chat message or transcribe audio. Curl,{' '}
+            <a className="underline underline-offset-2" href={JS_SDK_HREF}>
+              n-atlas
+            </a>
+            , and{' '}
+            <a className="underline underline-offset-2" href={PY_SDK_HREF}>
+              natlas
+            </a>{' '}
+            for that request show up here. Nothing is stored after you close the tab.
+          </p>
         </div>
       ) : (
-        <div className="mt-4 flex min-h-0 flex-1 flex-col">
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-[var(--muted)]">
-              Last request · <span className="font-medium text-[var(--ink)]">{action.title}</span>
-            </p>
-            <div
-              role="tablist"
-              aria-label="Snippet language"
-              className="flex gap-1 rounded-full bg-[var(--bg-sunken)] p-1"
-            >
-              {TABS.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === item.id}
-                  onClick={() => {
-                    setTab(item.id);
-                    setCopied(false);
-                  }}
-                  className={`rounded-full px-3 py-1.5 text-sm ${
-                    tab === item.id
-                      ? 'bg-[var(--bg-elev)] text-[var(--ink)] shadow-sm'
-                      : 'text-[var(--muted)]'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
+        <pre className="font-mono min-h-0 flex-1 overflow-auto bg-[var(--code-bg)] py-3 text-[13px] leading-6 text-[var(--code-ink)]">
+          {lines.map((line, index) => (
+            <div key={`${index}-${line.slice(0, 12)}`} className="flex min-w-full">
+              <span className="sticky left-0 w-10 shrink-0 bg-[var(--code-bg)] pr-3 text-right text-[var(--code-muted)] select-none">
+                {index + 1}
+              </span>
+              <span className="pr-4 whitespace-pre">{line.length > 0 ? line : ' '}</span>
             </div>
-          </div>
-          <div className="relative mt-3 min-h-0 flex-1">
-            <button
-              type="button"
-              onClick={() => {
-                void navigator.clipboard.writeText(current).then(() => {
-                  setCopied(true);
-                  window.setTimeout(() => setCopied(false), 1600);
-                });
-              }}
-              className="absolute top-3 right-3 z-10 rounded-full bg-white/10 px-3 py-1 text-xs text-[#f6f3ea]"
-            >
-              {copied ? 'Copied' : 'Copy'}
-            </button>
-            <pre className="h-full max-w-full min-h-0 overflow-auto rounded-3xl bg-[#10211a] p-4 pt-12 text-[13px] leading-6 text-[#e7f2ea]">
-              <code className="block w-max min-w-full">{current}</code>
-            </pre>
-          </div>
-        </div>
+          ))}
+        </pre>
       )}
     </section>
   );
