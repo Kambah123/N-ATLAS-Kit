@@ -118,7 +118,12 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["ANN", "S", "T20"]
+"tests/**" = ["ANN", "S", "T20", "A004"]
+# TimeoutError matches the JS SDK. It intentionally shadows the builtin.
+"src/natlas/errors.py" = ["A001"]
+"src/natlas/__init__.py" = ["A004"]
+"src/natlas/wire.py" = ["A004"]
+"src/natlas/transport.py" = ["A004"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["natlas"]

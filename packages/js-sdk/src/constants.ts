@@ -2,9 +2,8 @@
  * Stable facts about N-ATLaS, verified against the Hugging Face model cards
  * on 2026-09-24.
  *
- * Everything here is descriptive metadata about the real models. No inference
- * logic lives in this file - the client, adapters and helpers land in the
- * following milestones.
+ * Everything here is descriptive metadata about the real models. The client
+ * lives in `client.ts`; these values are what it refuses to drift away from.
  */
 
 /** The four languages N-ATLaS supports, as BCP-47-ish short codes. */

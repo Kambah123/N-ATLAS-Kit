@@ -12,6 +12,15 @@ together from this file.
 
 ### Added
 
+- `n-atlas` (JavaScript) and `natlas` (Python) clients for the `/serve`
+  gateway: chat (including SSE streaming), transcription for Hausa, Igbo,
+  Yoruba, and Nigerian English, `listModels` / `health`, plus small helpers
+  that prompt N-ATLaS to translate, summarise, detect language, or reply to a
+  voice note. Typed errors, timeouts, and retries with backoff. Tests mock
+  HTTP and do not call a GPU.
+- Runnable examples under `examples/js` and `examples/python` for chat,
+  streaming, and transcription.
+
 - pnpm workspace monorepo: `packages/js-sdk`, `packages/python-sdk`, `serve`,
   `apps/playground`, `docs`, `examples`.
 - TypeScript in strict mode (plus `noUncheckedIndexedAccess`,

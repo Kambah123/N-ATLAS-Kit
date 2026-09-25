@@ -92,11 +92,18 @@ Same API in Python. Same API in the browser. Same API on the edge.
 
 ## Status
 
-**The backend is built. The SDKs are next.**
+**The gateway and both client SDKs are built.** The playground, docs site, CLI,
+and local `transformers` backend are not.
 
-[`serve/`](./serve/) is complete and tested: N-ATLaS and all four ASR models
-behind one OpenAI-compatible base URL, deployable with `docker compose up` or
-`modal deploy`. Everything else below is tooling-only until it is ticked.
+[`serve/`](./serve/) puts N-ATLaS and all four ASR models behind one
+OpenAI-compatible base URL (`docker compose up` or `modal deploy`).
+[`packages/js-sdk`](./packages/js-sdk/) (`n-atlas`) and
+[`packages/python-sdk`](./packages/python-sdk/) (`natlas`) call that gateway:
+chat, streaming, transcription, health, and a few prompt helpers. Install
+instructions and quickstarts are in each package README. Runnable scripts live
+in [`examples/`](./examples/).
+
+SDK tests mock HTTP. Nothing in this repo was run against a real GPU.
 
 > No GPU was available while `serve/` was written. Its 149 tests all run on
 > CPU against real ffmpeg and a mocked vLLM; what that leaves unverified is
@@ -107,24 +114,24 @@ behind one OpenAI-compatible base URL, deployable with `docker compose up` or
 
 #### `packages/js-sdk` — npm `n-atlas`
 
-- [ ] `new NAtlas({ baseURL, apiKey, backend })`
-- [ ] `chat({ messages, language, temperature, maxTokens, stream })` — streaming returns an async iterator
-- [ ] `translate({ text, from, to })` across `ha` / `ig` / `yo` / `en`
-- [ ] `summarize({ text, language })`
-- [ ] `detectLanguage(text)`
-- [ ] `transcribe({ audio, language })` — `File` | `Blob` | `Buffer`
-- [ ] `voiceChat({ audio, language })` — transcribe then chat, returns both
-- [ ] Typed errors: `AuthError`, `RateLimitError`, `BackendError`
-- [ ] Retries with exponential backoff, timeouts, `AbortSignal`
-- [ ] Per-language system prompts tuned for each helper
-- [ ] Backend adapters in separate files: `openai-compatible`, `hf-endpoint`, `official`
-- [ ] Works on Node 18+, browsers and edge runtimes; ESM + CJS via tsup
+- [x] `new NAtlas({ baseURL, apiKey, backend })`
+- [x] `chat({ messages, language, temperature, maxTokens, stream })` — streaming returns an async iterator
+- [x] `translate({ text, from, to })` across `ha` / `ig` / `yo` / `en` (an N-ATLaS prompt, not a separate model)
+- [x] `summarize({ text, language })`
+- [x] `detectLanguage(text)` — returns `null` when the reply is not a language code
+- [x] `transcribe({ audio, language })` — `File` | `Blob` | `Buffer` | path (Node)
+- [x] `voiceChat({ audio, language })` — transcribe then chat, returns both
+- [x] Typed errors: `AuthError`, `RateLimitError`, `BadRequestError`, `ServerError`, `NetworkError`, `TimeoutError`, `AbortError`
+- [x] Retries with exponential backoff, timeouts, `AbortSignal`
+- [ ] Native-speaker review of the helper prompts (they are English instructions that name the target language)
+- [x] Backend adapters in separate files: `openai-compatible`, `hf-endpoint`. `official` throws until an NCAIR API exists
+- [x] Node 18+ and modern browsers via `fetch`; ESM + CJS via tsup
 
 #### `packages/python-sdk` — PyPI `natlas`
 
-- [ ] Same API surface, sync **and** async, on `httpx`
-- [ ] `local` backend running the models directly via `transformers` (`pip install natlas[local]`)
-- [ ] Pydantic response models
+- [x] Same API surface, sync **and** async, on `httpx`
+- [ ] `local` backend running the models directly via `transformers` (`pip install natlas[local]`) — constructing `backend="local"` raises
+- [x] Pydantic response models
 - [ ] CLI: `natlas chat --lang ha`, `natlas transcribe voice.ogg --lang ha`, `natlas translate "..." --to yo`
 
 #### `serve/` — the real backend ✅ **built** — see [`serve/README.md`](./serve/README.md)
@@ -161,6 +168,7 @@ behind one OpenAI-compatible base URL, deployable with `docker compose up` or
 
 #### `examples/`
 
+- [x] `examples/js` and `examples/python` — chat, streaming chat, and transcription against a gateway you already run
 - [ ] `hausa-chatbot-cli` (Python)
 - [ ] `whatsapp-voice-note-transcriber` (Node) — `.ogg` → Hausa transcript → English
 - [ ] `yoruba-summarizer` (JS)

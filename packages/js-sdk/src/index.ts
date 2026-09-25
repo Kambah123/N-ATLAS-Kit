@@ -1,37 +1,68 @@
 /**
- * `n-atlas` - the JavaScript / TypeScript SDK for N-ATLaS, Nigeria's sovereign
- * multilingual LLM.
+ * `n-atlas` — the JavaScript / TypeScript SDK for N-ATLaS, Nigeria's
+ * sovereign multilingual LLM, and its four ASR models.
  *
- * ## Status
- *
- * Scaffold only. This entry point currently exports verified model metadata;
- * the `NAtlas` client, backend adapters, streaming chat, transcription and the
- * language helpers arrive in the next milestone. See the planned-features list
- * in the repository README.
- *
- * ## Design commitments
- *
- * - Every inference path talks to `NCAIR1/N-ATLaS` or an `NCAIR1` ASR model.
- *   No other LLM is ever called.
- * - Zero heavy dependencies; runs on Node 18+, in browsers and on edge runtimes.
- * - Backends are pluggable, so the official NCAIR API can be added in one file.
+ * Every inference path talks to `NCAIR1/N-ATLaS` or an `NCAIR1` ASR model.
+ * Point {@link NAtlas} at a `/serve` gateway (`NATLAS_BASE_URL` +
+ * `NATLAS_API_KEY`). There is no public hosted API, and this package will
+ * not call any other vendor's model.
  *
  * @packageDocumentation
  */
 
 export {
-  LANGUAGES,
-  LANGUAGE_NAMES,
-  LLM_MODEL_ID,
-  LLM_CONTEXT_TOKENS,
-  ASR_MODEL_IDS,
   ASR_MAX_SEGMENT_SECONDS,
+  ASR_MODEL_IDS,
   ASR_SAMPLE_RATE,
-  BACKENDS,
   ATTRIBUTION,
+  BACKENDS,
+  LANGUAGE_NAMES,
+  LANGUAGES,
+  LLM_CONTEXT_TOKENS,
+  LLM_MODEL_ID,
   isLanguage,
 } from './constants.js';
 
-export type { Language, Backend } from './constants.js';
+export type { Backend, Language } from './constants.js';
+
+export {
+  AbortError,
+  AuthError,
+  BadRequestError,
+  NAtlasError,
+  NetworkError,
+  RateLimitError,
+  ServerError,
+  TimeoutError,
+  isNAtlasError,
+} from './errors.js';
+
+export type { ErrorCode, NAtlasErrorOptions } from './errors.js';
+
+export { languageFromModelText, normaliseLanguage } from './languages.js';
+
+export { NAtlas } from './client.js';
+export type { NAtlasOptions } from './client.js';
+
+export type {
+  AudioInput,
+  CallOptions,
+  ChatMessage,
+  ChatParams,
+  ChatResult,
+  ChatStreamChunk,
+  HealthStatus,
+  LanguageDetection,
+  ModelInfo,
+  ModelList,
+  ResponseFormat,
+  Summary,
+  TranscribeParams,
+  Transcription,
+  Translation,
+  Usage,
+  VoiceChatParams,
+  VoiceChatResult,
+} from './types.js';
 
 export { VERSION } from './version.js';
