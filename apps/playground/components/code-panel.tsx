@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import { type LastAction } from '@/components/types';
-import { renderSnippets, SDK_NOTE } from '@/lib/snippets';
+import { JS_SDK_HREF, PY_SDK_HREF, renderSnippets } from '@/lib/snippets';
 
 const TABS = [
   { id: 'curl', label: 'curl' },
-  { id: 'javascript', label: 'JavaScript' },
-  { id: 'python', label: 'Python' },
+  { id: 'javascript', label: 'n-atlas' },
+  { id: 'python', label: 'natlas' },
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
@@ -25,12 +25,23 @@ export function CodePanel({ action }: { action: LastAction | null }) {
     >
       <p className="text-xs font-medium tracking-[0.16em] text-[var(--gold)] uppercase">Get code</p>
       <h2 className="font-display mt-2 text-3xl">The call you just made.</h2>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">{SDK_NOTE}</p>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+        JavaScript uses{' '}
+        <a className="underline decoration-[var(--line)] underline-offset-2" href={JS_SDK_HREF}>
+          n-atlas
+        </a>{' '}
+        (<code>npm install n-atlas</code>). Python uses{' '}
+        <a className="underline decoration-[var(--line)] underline-offset-2" href={PY_SDK_HREF}>
+          natlas
+        </a>{' '}
+        (<code>pip install natlas</code>). Curl is the raw gateway call. Keep{' '}
+        <code>NATLAS_API_KEY</code> on the server.
+      </p>
 
       {!action || !snippets ? (
         <div className="mt-8 rounded-3xl border border-dashed border-[var(--line)] bg-[var(--bg-elev)] px-5 py-10 text-sm leading-6 text-[var(--muted)]">
-          Send a chat message or transcribe audio. Curl, JavaScript, and Python for that request
-          will show up here. Nothing is stored after you close the tab.
+          Send a chat message or transcribe audio. Curl, n-atlas, and natlas for that request will
+          show up here. Nothing is stored after you close the tab.
         </div>
       ) : (
         <div className="mt-5">

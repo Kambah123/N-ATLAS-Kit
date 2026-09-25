@@ -5,7 +5,7 @@
   "description": "Web playground for N-ATLaS chat and Nigerian-language speech transcription.",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18.18.0"
+    "node": ">=20"
   },
   "scripts": {
     "dev": "next dev",

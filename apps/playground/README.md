@@ -2,7 +2,7 @@
 
 A small Next.js app for trying N-ATLaS in the browser: streaming chat, speech
 to text, and a "get the code" panel that shows the same call in curl,
-JavaScript, and Python.
+`n-atlas`, and `natlas`.
 
 The browser never sees `NATLAS_API_KEY`. Pages call Next.js route handlers,
 and those handlers call the gateway in [`/serve`](../../serve/README.md).
@@ -13,7 +13,7 @@ and those handlers call the gateway in [`/serve`](../../serve/README.md).
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Chat**     | Stream a reply from `NCAIR1/N-ATLaS`. Pick a language hint (English, Hausa, Igbo, Yorùbá, Pidgin), try an example prompt, and set temperature and max tokens.                                                                                                                                  |
 | **Speech**   | Record from the microphone or upload `.ogg` (WhatsApp), `.mp3`, `.m4a`, or `.wav`. Choose Hausa, Igbo, Yorùbá, or Nigerian English — each one selects that NCAIR1 ASR model. **Reply to this** sends the transcript into chat. **Translate to English** asks N-ATLaS for an English rendering. |
-| **Get code** | Curl, `fetch`, and `httpx` for the last chat or transcription. The official SDKs (`n-atlas-kit`: `n-atlas` on npm and `natlas` on PyPI) are coming; these snippets do not depend on them.                                                                                                      |
+| **Get code** | Curl, [`n-atlas`](../../packages/js-sdk/) (`npm install n-atlas`), and [`natlas`](../../packages/python-sdk/) (`pip install natlas`) for the last chat or transcription. Curl stays the raw gateway call. The playground itself still calls the route handlers, not the SDK packages.          |
 
 A status pill polls `GET /health`. A cold gateway (Modal scales to zero) shows
 **Waking the model up (first request can take ~2 min)**. The server follows

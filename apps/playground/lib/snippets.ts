@@ -10,8 +10,15 @@ export type SnippetSet = {
   python: string;
 };
 
+/** Language codes `n-atlas` and `natlas` accept. Pidgin (`pcm`) is not one of them. */
+const SDK_LANGUAGES = new Set(['ha', 'ig', 'yo', 'en']);
+
+export const JS_SDK_HREF = 'https://github.com/Kambah123/N-ATLAS-Kit/tree/main/packages/js-sdk';
+
+export const PY_SDK_HREF = 'https://github.com/Kambah123/N-ATLAS-Kit/tree/main/packages/python-sdk';
+
 export const SDK_NOTE =
-  'The official SDKs (n-atlas-kit: `n-atlas` on npm and `natlas` on PyPI) are coming. Until then these snippets use plain fetch and httpx against the OpenAI-compatible API. Keep NATLAS_API_KEY on the server.';
+  'JavaScript uses n-atlas (npm install n-atlas). Python uses natlas (pip install natlas). Curl is the raw gateway call. Keep NATLAS_API_KEY on the server.';
 
 const V1_BASH = `# NATLAS_BASE_URL may be the origin or the origin plus /v1.
 base="\${NATLAS_BASE_URL%/}"
@@ -20,27 +27,27 @@ case "$base" in
   *) base="$base/v1" ;;
 esac`;
 
-const V1_JS = `// NATLAS_BASE_URL may be the origin or the origin plus /v1.
-const root = process.env.NATLAS_BASE_URL.replace(/\\/$/, '');
-const base = root.endsWith('/v1') ? root : \`\${root}/v1\`;
-const apiKey = process.env.NATLAS_API_KEY;`;
+const JS_CLIENT = `import { NAtlas } from 'n-atlas';
 
-const V1_PY = `import os
-import httpx
+const natlas = new NAtlas({
+  baseURL: process.env.NATLAS_BASE_URL,
+  apiKey: process.env.NATLAS_API_KEY,
+});`;
 
-# NATLAS_BASE_URL may be the origin or the origin plus /v1.
-root = os.environ["NATLAS_BASE_URL"].rstrip("/")
-base = root if root.endswith("/v1") else f"{root}/v1"
-api_key = os.environ["NATLAS_API_KEY"]`;
+const PY_CLIENT = `import os
+
+from natlas import NAtlas`;
 
 export function renderSnippets(request: CodeRequest): SnippetSet {
-  if (request.kind === 'transcription')
+  if (request.kind === 'transcription') {
     return renderTranscription(request.language, request.filename);
+  }
   return renderChat(request.body);
 }
 
 function renderChat(body: ChatRequestBody): SnippetSet {
   const json = JSON.stringify(body, null, 2);
+  const messages = JSON.stringify(body.messages, null, 2);
   const streamNote = body.stream
     ? ''
     : '\n# stream is false, so the response is one JSON object.\n';
@@ -53,86 +60,76 @@ curl ${body.stream ? '-N ' : ''}"$base/chat/completions" \\
   -d @- <<'NATLAS_BODY'
 ${json}
 NATLAS_BODY`,
-    javascript: `${V1_JS}
-
-const response = await fetch(\`\${base}/chat/completions\`, {
-  method: 'POST',
-  headers: {
-    Authorization: \`Bearer \${apiKey}\`,
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify(${json}),
-});
-
-if (!response.ok) {
-  throw new Error(await response.text());
-}
-${
-  body.stream
-    ? `
-const reader = response.body.getReader();
-const decoder = new TextDecoder();
-let buffer = '';
-while (true) {
-  const { value, done } = await reader.read();
-  if (done) break;
-  buffer += decoder.decode(value, { stream: true });
-  const lines = buffer.split('\\n');
-  buffer = lines.pop() ?? '';
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed.startsWith('data:')) continue;
-    const data = trimmed.slice(5).trim();
-    if (!data || data === '[DONE]') continue;
-    const chunk = JSON.parse(data);
-    const delta = chunk.choices?.[0]?.delta?.content;
-    if (delta) process.stdout.write(delta);
-  }
-}
-`
-    : `
-const completion = await response.json();
-console.log(completion.choices?.[0]?.message?.content ?? '');
-`
-}`,
-    python: `${V1_PY}
-
-payload = ${json}
-
-${
-  body.stream
-    ? `import json
-
-with httpx.stream(
-    "POST",
-    f"{base}/chat/completions",
-    headers={"Authorization": f"Bearer {api_key}"},
-    json=payload,
-    timeout=180,
-) as response:
-    response.raise_for_status()
-    for line in response.iter_lines():
-        if not line.startswith("data:"):
-            continue
-        data = line.removeprefix("data:").strip()
-        if not data or data == "[DONE]":
-            continue
-        delta = json.loads(data)["choices"][0].get("delta", {}).get("content")
-        if delta:
-            print(delta, end="", flush=True)
-print()
-`
-    : `response = httpx.post(
-    f"{base}/chat/completions",
-    headers={"Authorization": f"Bearer {api_key}"},
-    json=payload,
-    timeout=180,
-)
-response.raise_for_status()
-print(response.json()["choices"][0]["message"]["content"])
-`
-}`,
+    javascript: renderJsChat(body, messages),
+    python: renderPyChat(body, messages),
   };
+}
+
+function renderJsChat(body: ChatRequestBody, messages: string): string {
+  const call = `natlas.chat({
+  messages,
+${jsLanguageField(body.language)}  temperature: ${body.temperature},
+  maxTokens: ${body.max_tokens},
+  model: ${JSON.stringify(body.model)},
+  stream: ${body.stream ? 'true' : 'false'},
+})`;
+  const tail = body.stream
+    ? `const stream = await ${call};
+
+for await (const chunk of stream) {
+  if (chunk.delta) process.stdout.write(chunk.delta);
+}`
+    : `const reply = await ${call};
+console.log(reply.content);`;
+  return `${JS_CLIENT}
+
+const messages = ${messages};
+
+${tail}
+`;
+}
+
+function renderPyChat(body: ChatRequestBody, messages: string): string {
+  const args = `messages=messages,
+${pyLanguageArg(body.language)}        temperature=${body.temperature},
+        max_tokens=${body.max_tokens},
+        model=${JSON.stringify(body.model)},
+        stream=${body.stream ? 'True' : 'False'},`;
+  const bodyBlock = body.stream
+    ? `    for chunk in natlas.chat(
+        ${args}
+    ):
+        if chunk.delta:
+            print(chunk.delta, end="", flush=True)
+    print()`
+    : `    reply = natlas.chat(
+        ${args}
+    )
+    print(reply.content)`;
+  return `${PY_CLIENT}
+
+messages = ${messages}
+
+with NAtlas(
+    base_url=os.environ["NATLAS_BASE_URL"],
+    api_key=os.environ["NATLAS_API_KEY"],
+) as natlas:
+${bodyBlock}
+`;
+}
+
+function jsLanguageField(language: string): string {
+  if (SDK_LANGUAGES.has(language)) {
+    return `  language: ${JSON.stringify(language)},\n`;
+  }
+  return `  // ${JSON.stringify(language)} is not an n-atlas language (ha, ig, yo, en).\n  // The system message already asks the model to reply in that language.\n`;
+}
+
+function pyLanguageArg(language: string): string {
+  if (SDK_LANGUAGES.has(language)) {
+    return `        language=${JSON.stringify(language)},\n`;
+  }
+  return `        # ${JSON.stringify(language)} is not a natlas language (ha, ig, yo, en).\n        # The system message already asks the model to reply in that language.\n`;
 }
 
 function renderTranscription(language: AsrLanguage, filename: string): SnippetSet {
@@ -144,32 +141,28 @@ curl "$base/audio/transcriptions" \\
   -H "Authorization: Bearer $NATLAS_API_KEY" \\
   -F file=@${safe} \\
   -F language=${language}`,
-    javascript: `${V1_JS}
+    javascript: `${JS_CLIENT}
 
-const form = new FormData();
-form.append('file', file, '${safe}'); // File or Blob from the recording / upload
-form.append('language', '${language}');
-
-const response = await fetch(\`\${base}/audio/transcriptions\`, {
-  method: 'POST',
-  headers: { Authorization: \`Bearer \${apiKey}\` },
-  body: form,
+// \`file\` is a path (Node), Blob, File, or bytes.
+const heard = await natlas.transcribe({
+  audio: file,
+  language: ${JSON.stringify(language)},
+  filename: ${JSON.stringify(safe)},
 });
+console.log(heard.text);
+`,
+    python: `${PY_CLIENT}
 
-if (!response.ok) throw new Error(await response.text());
-const transcript = await response.json();
-console.log(transcript.text);`,
-    python: `${V1_PY}
-
-with open("${safe}", "rb") as audio:
-    response = httpx.post(
-        f"{base}/audio/transcriptions",
-        headers={"Authorization": f"Bearer {api_key}"},
-        data={"language": "${language}"},
-        files={"file": ("${safe}", audio)},
-        timeout=180,
+with NAtlas(
+    base_url=os.environ["NATLAS_BASE_URL"],
+    api_key=os.environ["NATLAS_API_KEY"],
+) as natlas:
+    heard = natlas.transcribe(
+        audio=${JSON.stringify(safe)},
+        language=${JSON.stringify(language)},
+        filename=${JSON.stringify(safe)},
     )
-response.raise_for_status()
-print(response.json()["text"])`,
+    print(heard.text)
+`,
   };
 }

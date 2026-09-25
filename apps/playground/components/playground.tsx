@@ -159,8 +159,8 @@ export function Playground({ configured }: { configured: boolean }) {
             ) : null}
             {tab === 'code' ? (
               <p className="text-sm leading-6 text-[var(--muted)]">
-                Snippets call the gateway directly. The key in them is an environment variable, the
-                same one this app keeps on the server.
+                n-atlas and natlas call the gateway with NATLAS_API_KEY from the environment, the
+                same variable this app keeps on the server. Curl is the raw HTTP call.
               </p>
             ) : null}
           </div>
