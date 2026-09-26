@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZIPA Mobile UI - Complete Design System & Showcase</title>
+  <style>
+    :root {
+      --canvas: #F8FAF8;
+      --surface: #FFFFFF;
+      --ink: #17211C;
+      --primary: #0B6B45;
+      --secondary: #16875B;
+      --accent: #DFF6E8;
+      --border: #E4EBE6;
+      --muted: #69756E;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Satoshi", "Inter", "Segoe UI", Roboto, sans-serif;
+      background-color: var(--canvas);
+      color: var(--ink);
+      line-height: 1.5;
+      padding: 32px 20px 100px;
+    }
+    .header {
+      max-width: 1280px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: var(--accent);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .palette-bar {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .color-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #FFF;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .color-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    .section-title {
+      max-width: 1280px;
+      margin: 48px auto 20px;
+      font-size: 22px;
+      font-weight: 800;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .section-title span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .gallery-grid {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 28px;
+    }
+    .screen-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(23, 33, 28, 0.04);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .screen-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(23, 33, 28, 0.08);
+    }
+    .card-img-container {
+      background: #EFF4F0;
+      padding: 16px 16px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .card-img-container img {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      border-radius: 24px 24px 0 0;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+      display: block;
+    }
+    .card-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .screen-num {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .screen-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .screen-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="badge">ZIPA Complete Mobile UI Pack</div>
+    <h1>ZIPA Production UI Mockups (iPhone 16 Pro)</h1>
+    <p class="subtitle">Complete, end-to-end mobile interface collection covering multi-currency wallet, crypto assets, @handle payments, utility bills, business invoicing, and account security.</p>
+    
+    <div class="palette-bar">
+      <div class="color-chip"><div class="color-dot" style="background: #0B6B45;"></div> Primary #0B6B45</div>
+      <div class="color-chip"><div class="color-dot" style="background: #16875B;"></div> Emerald #16875B</div>
+      <div class="color-chip"><div class="color-dot" style="background: #DFF6E8;"></div> Mint #DFF6E8</div>
+      <div class="color-chip"><div class="color-dot" style="background: #17211C;"></div> Ink #17211C</div>
+      <div class="color-chip"><div class="color-dot" style="background: #F8FAF8;"></div> Canvas #F8FAF8</div>
+    </div>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section-title">A. First Use & Account Access <span>Screens 01 – 05</span></div>
+  <div class="gallery-grid">
+    <div class="screen-card">
+      <div class="card-img-container"><img src="01_landing_welcome.png" alt="01 Landing Welcome" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 01 · welcome</div>
+          <div class="screen-title">Landing / Welcome</div>
+          <div class="screen-desc">Minimalist ZIPA wordmark, 'Money, made simpler' headline, connected money paths visual motif, dominant 'Create account' primary CTA.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="02_signup.png" alt="02 Sign Up" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 02 · sign_up</div>
+          <div class="screen-title">Sign Up & Phone Registration</div>
+          <div class="screen-desc">Nigeria (+234) country selector, phone/email input fields, privacy reassurance, and clear terms agreement.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="03_login.png" alt="03 Login" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 03 · login</div>
+          <div class="screen-title">Login / Returning User</div>
+          <div class="screen-desc">Returning sign-in with phone/email, secure password entry, Face ID biometrics toggle, and password recovery.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="04_handle_setup.png" alt="04 Handle Setup" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 04 · handle_setup</div>
+          <div class="screen-title">ZIPA @handle Claim</div>
+          <div class="screen-desc">Custom @handle registration with live availability badge ('@adaeze'), privacy preview, and instant pay routing.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="05_kyc_verification.png" alt="05 KYC Verification" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 05 · kyc_intro/document</div>
+          <div class="screen-title">Identity Verification (KYC)</div>
+          <div class="screen-desc">Document selection (NIN, Passport, Driver's Licence, Voter's Card), 256-bit data encryption assurance, camera capture flow.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section-title">B. Home, Wallet & Crypto Management <span>Screens 06 – 10</span></div>
+  <div class="gallery-grid">
+    <div class="screen-card">
+      <div class="card-img-container"><img src="06_dashboard_home.png" alt="06 Dashboard Home" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 06 · home</div>
+          <div class="screen-title">Command Dashboard (Home)</div>
+          <div class="screen-desc">Total balance ₦125,450.00 with eye toggle, 4 primary actions (Send, Receive, Add Money, Buy Crypto), Quick Pay grid, and recent transactions.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="07_wallet.png" alt="07 Wallet Overview" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 07 · wallet</div>
+          <div class="screen-title">Wallet Overview</div>
+          <div class="screen-desc">Clear separation of NGN Cash balance and Crypto portfolio holdings, active NGN virtual account status, and transaction ledger.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="08_crypto_portfolio.png" alt="08 Crypto Portfolio" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 08 · portfolio</div>
+          <div class="screen-title">Crypto Portfolio & Holdings</div>
+          <div class="screen-desc">Crypto asset valuation (≈ ₦84,200.00), sparkline trend, token list (USDT, USDC, BTC, ETH) with 24h market movement and risk note.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="09_buy_crypto.png" alt="09 Buy Crypto" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 09 · buy_crypto</div>
+          <div class="screen-title">Buy Crypto & Quote Calculator</div>
+          <div class="screen-desc">NGN to USDT quote calculator, transparent zero-fee breakdown, TRON (TRC20) network indicator, and 45s quote validity timer.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="10_sell_crypto.png" alt="10 Sell Crypto" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 10 · sell_crypto</div>
+          <div class="screen-title">Sell Crypto to NGN</div>
+          <div class="screen-desc">Asset liquidation quote, MAX button, indicative exchange rate, transparent processing fee, and instant NGN wallet deposit review.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section-title">C. Payments, Security & Execution Pipeline <span>Screens 11 – 17</span></div>
+  <div class="gallery-grid">
+    <div class="screen-card">
+      <div class="card-img-container"><img src="11_send_recipient.png" alt="11 Send Recipient" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 11 · send_recipient</div>
+          <div class="screen-title">Send Money — Select Recipient</div>
+          <div class="screen-desc">Recipient search by @handle, recent contact avatars, verified recipient confirmation card ('@adafemi • Ada Femi').</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="12_send_amount.png" alt="12 Send Amount" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 12 · send_amount</div>
+          <div class="screen-title">Send Money — Amount Entry</div>
+          <div class="screen-desc">Large amount keypad input (₦25,000.00), available balance display, optional transaction note, and zero fee preview.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="13_crypto_send.png" alt="13 Crypto Send" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 13 · crypto_send</div>
+          <div class="screen-title">Send Crypto On-Chain</div>
+          <div class="screen-desc">Asset & network selector (USDT - TRC20), destination address with QR scan, estimated gas fee, and irreversibility warning.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="14_receive.png" alt="14 Receive" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 14 · receive</div>
+          <div class="screen-title">Receive Money & QR Code</div>
+          <div class="screen-desc">Segmented ZIPA handle vs Crypto view, high-contrast QR code, copy handle button, privacy shield.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="15_transaction_review.png" alt="15 Transaction Review" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 15 · transaction_review</div>
+          <div class="screen-title">Pre-Authorization Review</div>
+          <div class="screen-desc">Clear financial breakdown before authorization: recipient, funding wallet, zero fee, total debit, and security prompt.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="16_passcode_authorization.png" alt="16 Passcode Authorization" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 16 · passcode_authorization</div>
+          <div class="screen-title">Passcode / Biometric Authorization</div>
+          <div class="screen-desc">Masked 4-digit PIN dots, Face ID prompt modal, numeric keypad, and recovery options.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="17_transaction_result.png" alt="17 Transaction Result" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 17 · transaction_result</div>
+          <div class="screen-title">Transaction Receipt & Success</div>
+          <div class="screen-desc">Vibrant success badge, full transaction receipt with Reference ID (ZIP-892401842-TX), Share Receipt & Done CTAs.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section-title">D. Utility & Household Bills <span>Screens 18 – 22</span></div>
+  <div class="gallery-grid">
+    <div class="screen-card">
+      <div class="card-img-container"><img src="18_pay_hub.png" alt="18 Pay Hub" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 18 · pay_hub</div>
+          <div class="screen-title">Bills & Utilities Directory Hub</div>
+          <div class="screen-desc">2x2 service grid (Airtime, Data, Electricity, Cable TV) with saved biller shortcuts for 1-tap recharges.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="19_airtime.png" alt="19 Airtime" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 19 · airtime</div>
+          <div class="screen-title">Airtime Top-Up Form</div>
+          <div class="screen-desc">MTN/Airtel/Glo/9mobile provider selector, Nigeria +234 phone input, amount presets (₦500-₦5,000), save beneficiary.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="20_data.png" alt="20 Data" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 20 · data</div>
+          <div class="screen-title">Data Bundle Purchase</div>
+          <div class="screen-desc">Network data plan selector with validity and pricing (1.5GB, 3GB, 10GB, 20GB), recipient verification, review CTA.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="21_electricity.png" alt="21 Electricity" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 21 · electricity</div>
+          <div class="screen-title">Electricity Bill Payment</div>
+          <div class="screen-desc">Disco selector (IKEDC/EKEDC), Prepaid/Postpaid switch, meter lookup with verified customer name result before amount.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="22_cable_tv.png" alt="22 Cable TV" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 22 · cable_tv</div>
+          <div class="screen-title">Cable TV Subscription</div>
+          <div class="screen-desc">DStv/GOtv provider selection, Smartcard IUC lookup, package selector (Compact Plus), customer confirmation.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="section-title">E. Activity Ledger & Receipts <span>Screens 23 – 24</span></div>
+  <div class="gallery-grid">
+    <div class="screen-card">
+      <div class="card-img-container"><img src="23_activity.png" alt="23 Activity" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 23 · activity</div>
+          <div class="screen-title">Activity & Transaction History</div>
+          <div class="screen-desc">Searchable ledger grouped by Today, Yesterday, with filter chips (All, Money In, Money Out, Crypto, Bills) and signed amounts.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="24_transaction_detail.png" alt="24 Transaction Detail" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 24 · transaction_detail</div>
+          <div class="screen-title">Transaction Receipt & Support</div>
+          <div class="screen-desc">Comprehensive transaction details card with Reference ID, timestamps, Share Receipt, and Get Help support routing.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="section-title">F. Invoicing & Small Business <span>Screens 25 – 27</span></div>
+  <div class="gallery-grid">
+    <div class="screen-card">
+      <div class="card-img-container"><img src="25_invoice_list.png" alt="25 Invoice List" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 25 · invoice_list</div>
+          <div class="screen-title">Invoices Dashboard</div>
+          <div class="screen-desc">Summary metrics for Draft, Outstanding, and Paid invoices, list filter, and '+ New Invoice' dominant creation CTA.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="26_invoice_create.png" alt="26 Create Invoice" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 26 · invoice_create</div>
+          <div class="screen-title">Create Invoice Form</div>
+          <div class="screen-desc">Structured client details, auto-generated invoice #, line items list with unit prices and quantity, subtotal, and preview.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="27_public_invoice.png" alt="27 Public Invoice" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 27 · public_invoice</div>
+          <div class="screen-title">Public Customer Invoice View</div>
+          <div class="screen-desc">Responsive customer view with issuer info, line-item itemization, and 'Pay with ZIPA @handle' or card checkout CTA.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 7 -->
+  <div class="section-title">G. People, Profile & Security <span>Screens 28 – 30</span></div>
+  <div class="gallery-grid">
+    <div class="screen-card">
+      <div class="card-img-container"><img src="28_contacts.png" alt="28 Contacts" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 28 · contacts</div>
+          <div class="screen-title">Contacts Directory</div>
+          <div class="screen-desc">Search by name or @handle, recent recipients, saved contacts with verified checkmarks, and friend invite actions.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="29_profile.png" alt="29 Profile" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 29 · profile</div>
+          <div class="screen-title">Profile & Account Overview</div>
+          <div class="screen-desc">Verified Level 2 status badge, @handle copy, quick navigation to Security, Business Invoicing, Zipa Points, and Settings.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-card">
+      <div class="card-img-container"><img src="30_security.png" alt="30 Security" /></div>
+      <div class="card-body">
+        <div>
+          <div class="screen-num">Screen 30 · security</div>
+          <div class="screen-title">Security & MFA Center</div>
+          <div class="screen-desc">Passcode management, Face ID biometric toggle, 2-Factor Authentication status, login alerts, and active device sessions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
